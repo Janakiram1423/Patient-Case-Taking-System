@@ -85,12 +85,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       icon: <CalendarCheck2 className="w-4 h-4 text-amber-500" />,
       badge: `${patients.filter(patient => patient.created_at.startsWith(today)).length}`,
       badgeColor: 'bg-amber-100 text-amber-800'
-    },
-    {
-      id: 'cases',
-      label: 'Automatic Case Summary & Review',
-      icon: <FolderHeart className="w-4 h-4" />,
-      badge: `${cases.length}`
     }
   ];
 
@@ -122,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     },
     {
       id: 'analytics',
-      label: 'Clinical Analytics',
+      label: 'AI Analytics',
       icon: <BarChart3 className="w-4 h-4 text-sky-500" />
     },
     {
@@ -132,8 +126,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     },
     {
       id: 'cases',
-      label: 'Medical Audit Records',
-      icon: <FolderHeart className="w-4 h-4" />
+      label: 'AI Case Review & Summary',
+      icon: <FolderHeart className="w-4 h-4" />,
+      badge: `${cases.length}`
     },
     {
       id: 'audit-logs',

@@ -19,7 +19,6 @@ import { Badge } from '../common/Badge';
 import { MedicalCaseSheetPDF } from '../reports/MedicalCaseSheetPDF';
 import { Modal } from '../common/Modal';
 import { CaseRecord } from '../../types';
-import { AICaseAssistantView } from '../ai/AICaseAssistantModal';
 
 interface DoctorDashboardProps {
   onStartNewCase: (patientId?: string) => void;
@@ -260,13 +259,19 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
           </div>
         </div>
 
-        {/* Right Col: AI Case Assistant Quick Box & Guidelines */}
+        {/* Right Col: Clinical quick actions */}
         <div className="space-y-4">
-          <AICaseAssistantView
-            onSelectSymptomForCase={symptom => onStartNewCase()}
-            onNavigate={onNavigateModule}
-          />
-
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+              <TrendingUp className="w-4 h-4 text-sky-600" />
+              <h3 className="font-bold text-slate-900 text-sm">Clinical Workflow</h3>
+            </div>
+            <div className="mt-3 space-y-2 text-xs text-slate-600">
+              <p>• Open patient queue for intake and triage.</p>
+              <p>• Record structured case-taking details.</p>
+              <p>• Review longitudinal history and print signed case sheets.</p>
+            </div>
+          </div>
         </div>
       </div>
 

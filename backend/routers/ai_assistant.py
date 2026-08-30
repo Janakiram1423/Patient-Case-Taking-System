@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import Optional, List
 import asyncio
@@ -6,6 +6,7 @@ import json
 import os
 from urllib.request import Request, urlopen
 from models.schemas import VitalSigns
+from authz import require_admin_role
 from services.clinical_engine import (
     calculate_news2_score,
     generate_symptom_inquiry,
@@ -68,19 +69,19 @@ def _ask_configured_ai(question: str, context: str) -> Optional[str]:
         result = json.loads(response.read().decode("utf-8"))
     return result["choices"][0]["message"]["content"]
 
-@router.post("/symptom-questions")
+@router.post("/symptom-questions", dependencies=[Depends(require_admin_role)])
 def get_symptom_questions(payload: SymptomInquiryRequest):
     return generate_symptom_inquiry(payload.complaint, payload.language or "en")
 
-@router.post("/differential-diagnosis")
+@router.post("/differential-diagnosis", dependencies=[Depends(require_admin_role)])
 def get_differential_diagnosis(payload: DifferentialRequest):
     return generate_differential_diagnosis(payload.complaint, payload.vitals, payload.history or "")
 
-@router.post("/vitals-score")
+@router.post("/vitals-score", dependencies=[Depends(require_admin_role)])
 def evaluate_vitals(vitals: VitalSigns):
     return calculate_news2_score(vitals)
 
-@router.post("/patient-discharge-instructions")
+@router.post("/patient-discharge-instructions", dependencies=[Depends(require_admin_role)])
 def get_patient_discharge_instructions(payload: DischargeInstructionsRequest):
     return generate_patient_instructions(
         patient_name=payload.patient_name,
@@ -92,7 +93,7 @@ def get_patient_discharge_instructions(payload: DischargeInstructionsRequest):
         language=payload.language or "hi"
     )
 
-@router.post("/assistant")
+@router.post("/assistant", dependencies=[Depends(require_admin_role)])
 async def ask_general_assistant(payload: GeneralAssistantRequest):
     question = payload.question.strip()
     if not question:

@@ -6,6 +6,7 @@ interface AuthContextValue {
   currentUser: User;
   currentRole: UserRole;
   allUsers: User[];
+  isAuthenticated: boolean;
   switchUser: (userId: string) => void;
   switchRole: (role: UserRole) => void;
   login: (email: string, role?: UserRole) => boolean;
@@ -16,6 +17,7 @@ interface AuthContextValue {
   canManageUsers: boolean;
   canRegisterPatient: boolean;
   canManageQueue: boolean;
+  canAccessAIFeatures: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -42,14 +44,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return users[0]; // Default to Dr. Sarah Chen
   });
 
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('clinicase_is_authenticated') === 'true';
+  });
+
   useEffect(() => {
     localStorage.setItem('clinicase_current_user_id', currentUser.id);
   }, [currentUser]);
+
+  useEffect(() => {
+    localStorage.setItem('clinicase_is_authenticated', String(isAuthenticated));
+  }, [isAuthenticated]);
 
   const switchUser = (userId: string) => {
     const found = users.find(u => u.id === userId);
     if (found) {
       setCurrentUser(found);
+      setIsAuthenticated(true);
     }
   };
 
@@ -57,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const found = users.find(u => u.role === role);
     if (found) {
       setCurrentUser(found);
+      setIsAuthenticated(true);
     }
   };
 
@@ -67,14 +79,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     if (found) {
       setCurrentUser(found);
+      setIsAuthenticated(true);
       return true;
     }
     return false;
   };
 
   const logout = () => {
-    // Switch back to default doctor demo user
+    setIsAuthenticated(false);
     setCurrentUser(users[0]);
+    localStorage.removeItem('clinicase_current_user_id');
   };
 
   // Role permissions
@@ -85,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const canManageUsers = role === 'admin';
   const canRegisterPatient = role === 'receptionist' || role === 'doctor' || role === 'admin';
   const canManageQueue = role === 'receptionist' || role === 'admin' || role === 'doctor';
+  const canAccessAIFeatures = role === 'admin';
 
   return (
     <AuthContext.Provider
@@ -92,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentUser,
         currentRole: role,
         allUsers: users,
+        isAuthenticated,
         switchUser,
         switchRole,
         login,
@@ -101,7 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         canPrescribe,
         canManageUsers,
         canRegisterPatient,
-        canManageQueue
+        canManageQueue,
+        canAccessAIFeatures
       }}
     >
       {children}

@@ -4,6 +4,7 @@ import { HospitalProvider, useHospital } from './context/HospitalContext';
 import { ToastProvider } from './context/ToastContext';
 import { Navbar } from './components/common/Navbar';
 import { Sidebar, ActiveTab } from './components/common/Sidebar';
+import { LoginScreen } from './components/common/LoginScreen';
 import { DoctorDashboard } from './components/dashboard/DoctorDashboard';
 import { ReceptionDashboard } from './components/dashboard/ReceptionDashboard';
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
@@ -33,8 +34,12 @@ import { formatDate, formatDateTime } from './utils/formatters';
 import { Badge } from './components/common/Badge';
 
 const MainAppContent: React.FC = () => {
-  const { currentRole, currentUser } = useAuth();
+  const { currentRole, currentUser, isAuthenticated, canAccessAIFeatures } = useAuth();
   const { patients, cases, hospitalInfo, clearCaseRecords } = useHospital();
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [selectedPatientTimelineId, setSelectedPatientTimelineId] = useState<string | null>(null);
@@ -283,11 +288,18 @@ const MainAppContent: React.FC = () => {
 
               {/* AI ASSISTANT EXPLORER */}
               {activeTab === 'ai-assistant' && (
-                <AICaseAssistantView
-                  onSelectSymptomForCase={symptom => {
-                    handleStartNewCase();
-                  }}
-                />
+                canAccessAIFeatures ? (
+                  <AICaseAssistantView
+                    onSelectSymptomForCase={symptom => {
+                      handleStartNewCase();
+                    }}
+                  />
+                ) : (
+                  <div className="bg-white rounded-2xl border border-rose-200 p-8 shadow-xs text-center">
+                    <h3 className="text-lg font-black text-rose-700">Access Denied</h3>
+                    <p className="mt-2 text-sm text-slate-600">This AI feature is restricted to admin users only.</p>
+                  </div>
+                )
               )}
 
               {/* ADMIN: STAFF ROSTER */}
@@ -297,7 +309,14 @@ const MainAppContent: React.FC = () => {
               {activeTab === 'audit-logs' && <AuditLogViewer />}
 
               {/* ADMIN: CLINICAL ANALYTICS */}
-              {activeTab === 'analytics' && <AnalyticsView />}
+              {activeTab === 'analytics' && (
+                canAccessAIFeatures ? <AnalyticsView /> : (
+                  <div className="bg-white rounded-2xl border border-rose-200 p-8 shadow-xs text-center">
+                    <h3 className="text-lg font-black text-rose-700">Access Denied</h3>
+                    <p className="mt-2 text-sm text-slate-600">AI analytics is available only to admin users.</p>
+                  </div>
+                )
+              )}
 
               {/* ADMIN: HOSPITAL SETTINGS */}
               {activeTab === 'settings' && <HospitalSettings />}

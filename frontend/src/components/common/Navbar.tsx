@@ -38,7 +38,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   // Search matching patients and cases
   const matchingPatients = searchQuery.trim()
@@ -61,19 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       )
     : [];
 
-  const roleIcons = {
-    doctor: <Stethoscope className="w-3.5 h-3.5 text-sky-600" />,
-    receptionist: <Users className="w-3.5 h-3.5 text-emerald-600" />,
-    admin: <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />,
-    patient: <UserCheck className="w-3.5 h-3.5 text-amber-600" />
-  };
 
-  const roleBadges = {
-    doctor: <Badge variant="primary" size="sm">Doctor</Badge>,
-    receptionist: <Badge variant="success" size="sm">Receptionist</Badge>,
-    admin: <Badge variant="purple" size="sm">Admin</Badge>,
-    patient: <Badge variant="warning" size="sm">Patient Portal</Badge>
-  };
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
@@ -250,83 +237,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <RotateCcw className="w-4 h-4" />
             </button>
 
-            {/* Role Switcher Pill */}
-            <div className="relative">
-              <button
-                onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                className="flex items-center gap-2 p-1.5 pl-2 rounded-2xl border border-slate-200 hover:border-sky-300 hover:bg-slate-50 transition-all shadow-2xs"
-              >
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
-                  className="w-7 h-7 rounded-full object-cover border border-sky-300"
-                />
-                <div className="text-left hidden lg:block pr-1">
-                  <p className="text-xs font-bold text-slate-900 leading-tight flex items-center gap-1">
-                    {currentUser.name}
-                    <ChevronDown className="w-3 h-3 text-slate-400" />
-                  </p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    {roleIcons[currentRole]}
-                    <span className="text-[10px] text-slate-500 font-medium capitalize">
-                      {currentUser.role}
-                    </span>
-                  </div>
-                </div>
-                <div className="lg:hidden">
-                  {roleBadges[currentRole]}
-                </div>
-              </button>
-
-              {/* Role Switcher Modal / Dropdown */}
-              {showRoleDropdown && (
-                <div
-                  className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-50 animate-in fade-in zoom-in-95"
-                  onMouseLeave={() => setShowRoleDropdown(false)}
-                >
-                  <div className="p-2 border-b border-slate-100 mb-1">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      Switch Active User / Role
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      Experience CliniCase AI from any perspective
-                    </p>
-                  </div>
-
-                  <div className="space-y-1">
-                    {allUsers.map(user => (
-                      <button
-                        key={user.id}
-                        onClick={() => {
-                          switchUser(user.id);
-                          setShowRoleDropdown(false);
-                        }}
-                        className={`w-full text-left p-2 rounded-xl flex items-center justify-between text-xs transition-colors ${
-                          user.id === currentUser.id
-                            ? 'bg-sky-50 text-sky-900 font-bold border border-sky-200'
-                            : 'hover:bg-slate-50 text-slate-700'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <img
-                            src={user.avatar}
-                            alt={user.name}
-                            className="w-7 h-7 rounded-full object-cover"
-                          />
-                          <div>
-                            <p className="font-semibold text-slate-900">{user.name}</p>
-                            <p className="text-[10px] text-slate-500 capitalize">
-                              {user.role} {user.department ? `• ${user.department.split('&')[0]}` : ''}
-                            </p>
-                          </div>
-                        </div>
-                        {roleBadges[user.role]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
