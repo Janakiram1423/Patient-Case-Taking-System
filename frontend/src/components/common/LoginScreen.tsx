@@ -35,10 +35,18 @@ const loginOptions: Array<{
   }
 ];
 
+const rolePasswords: Record<UserRole, string> = {
+  doctor: 'doctor123',
+  patient: 'patient123',
+  admin: 'admin123',
+  receptionist: 'reception123'
+};
+
 export const LoginScreen: React.FC = () => {
   const { login, allUsers } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserRole>('doctor');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const roleMembers = useMemo(() => {
@@ -47,8 +55,28 @@ export const LoginScreen: React.FC = () => {
 
   const handleLogin = () => {
     const normalized = email.trim().toLowerCase();
-    const match = normalized
-      ? login(normalized, selectedRole)
+    const selectedMember = normalized
+      ? roleMembers.find(member => member.email.toLowerCase() === normalized)
+      : roleMembers[0];
+
+    if (!selectedMember && normalized) {
+      setError('This email does not belong to the selected login type.');
+      return;
+    }
+
+    if (!password.trim()) {
+      setError('Please enter your password.');
+      return;
+    }
+
+    const expectedPassword = rolePasswords[selectedRole];
+    if (password.trim() !== expectedPassword) {
+      setError('Incorrect password for this login type.');
+      return;
+    }
+
+    const match = selectedMember
+      ? login(selectedMember.email, selectedRole)
       : login(roleMembers[0]?.email || '', selectedRole);
 
     if (!match) {
@@ -87,6 +115,7 @@ export const LoginScreen: React.FC = () => {
                       onClick={() => {
                         setSelectedRole(option.role);
                         setEmail('');
+                        setPassword('');
                         setError('');
                       }}
                       className={`w-full flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-all ${
@@ -129,6 +158,17 @@ export const LoginScreen: React.FC = () => {
                   value={email}
                   onChange={event => setEmail(event.target.value)}
                   placeholder={roleMembers[0]?.email || 'name@hospital.org'}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={event => setPassword(event.target.value)}
+                  placeholder="Enter your password"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100 text-sm"
                 />
               </div>
