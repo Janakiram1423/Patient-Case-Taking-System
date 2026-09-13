@@ -141,11 +141,6 @@ export const LoginScreen: React.FC = () => {
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
         <div className="grid md:grid-cols-2">
           <div className="bg-gradient-to-br from-sky-700 via-sky-800 to-indigo-900 p-8 text-white">
-            <div className="mb-6">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] text-sky-100">
-                CliniCase AI
-              </span>
-            </div>
             <h1 className="text-3xl font-black tracking-tight">Select login</h1>
             <p className="mt-3 text-sm text-sky-100 max-w-md">
               Choose your login type to continue.

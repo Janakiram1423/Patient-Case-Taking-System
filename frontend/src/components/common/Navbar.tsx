@@ -72,14 +72,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Activity className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-slate-900 tracking-tight text-base sm:text-lg">
-                  CliniCase<span className="text-sky-600">AI</span>
-                </span>
-                <span className="px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 text-[10px] font-black tracking-wider">
-                  PRO
-                </span>
-              </div>
               <p className="text-[11px] text-slate-500 hidden sm:block truncate max-w-xs font-medium">
                 {hospitalInfo.name}
               </p>
