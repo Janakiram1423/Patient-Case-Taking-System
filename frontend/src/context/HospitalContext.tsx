@@ -46,7 +46,19 @@ interface HospitalContextValue {
 }
 
 const HospitalContext = createContext<HospitalContextValue | undefined>(undefined);
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+const getApiBaseUrl = () => {
+  const configured = import.meta.env.VITE_API_BASE_URL;
+  if (configured) return configured;
+
+  const host = window.location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0') {
+    return 'http://127.0.0.1:8000/api';
+  }
+
+  return `http://${host}:8000/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const normalizeStaffUsers = (incoming: User[]) =>
   incoming
