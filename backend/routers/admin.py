@@ -19,6 +19,48 @@ async def get_staff_roster():
             pass
     return db_store.users
 
+@router.post("/staff")
+async def create_staff_member(payload: Dict[str, Any]):
+    db = get_db()
+    if db is not None:
+        try:
+            result = await db.users.insert_one(payload)
+            doc = await db.users.find_one({"_id": result.inserted_id})
+            return clean_mongo_doc(doc)
+        except Exception:
+            pass
+    db_store.users.append(payload)
+    return payload
+
+@router.put("/staff")
+async def replace_staff_roster(payload: List[Dict[str, Any]]):
+    db = get_db()
+    if db is not None:
+        try:
+            await db.users.delete_many({})
+            if payload:
+                await db.users.insert_many(payload)
+            cursor = db.users.find({})
+            docs = await cursor.to_list(length=200)
+            return clean_mongo_docs(docs)
+        except Exception:
+            pass
+    db_store.users = payload
+    return db_store.users
+
+@router.delete("/staff/{user_id}")
+async def delete_staff_member(user_id: str):
+    db = get_db()
+    if db is not None:
+        try:
+            result = await db.users.delete_one({"id": user_id})
+            if result.deleted_count:
+                return {"deleted": True, "user_id": user_id}
+        except Exception:
+            pass
+    db_store.users = [user for user in db_store.users if user.get("id") != user_id]
+    return {"deleted": True, "user_id": user_id}
+
 @router.get("/audit-logs")
 async def get_audit_logs():
     db = get_db()

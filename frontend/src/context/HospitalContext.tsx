@@ -46,6 +46,12 @@ interface HospitalContextValue {
 }
 
 const HospitalContext = createContext<HospitalContextValue | undefined>(undefined);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+
+const normalizeStaffUsers = (incoming: User[]) =>
+  incoming
+    .filter(user => user.role !== 'patient')
+    .map(user => ({ ...user, avatar: '' }));
 
 export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
@@ -128,10 +134,27 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('clinicase_users');
     const storedUsers: User[] = saved ? JSON.parse(saved) : INITIAL_USERS;
-    return storedUsers
-      .filter(user => user.role !== 'patient')
-      .map(user => ({ ...user, avatar: '' }));
+    return normalizeStaffUsers(storedUsers);
   });
+
+  useEffect(() => {
+    const loadUsersFromServer = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/admin/staff`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const nextUsers = normalizeStaffUsers(data as User[]);
+          setUsers(nextUsers);
+          localStorage.setItem('clinicase_users', JSON.stringify(nextUsers));
+        }
+      } catch {
+        // Ignore if backend is unavailable.
+      }
+    };
+
+    loadUsersFromServer();
+  }, []);
 
   // Sync to LocalStorage
   useEffect(() => {
@@ -354,17 +377,33 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   // User Management
+  const syncUsersToServer = async (nextUsers: User[]) => {
+    try {
+      await fetch(`${API_BASE_URL}/admin/staff`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nextUsers)
+      });
+    } catch {
+      // Client-side localStorage remains the fallback when the backend is unavailable.
+    }
+  };
+
   const addUser = (userData: Omit<User, 'id'>): User => {
     const id = `${userData.role.slice(0, 3)}-${Date.now().toString().slice(-3)}`;
     const newUser: User = { ...userData, id };
-    setUsers(prev => [...prev, newUser]);
+    const nextUsers = [...users, newUser];
+    setUsers(nextUsers);
+    syncUsersToServer(nextUsers);
     addAuditLog('Created User Account', 'User', id, `Added ${newUser.name} with role ${newUser.role}`);
     showToast('success', 'User Added', `${newUser.name} has been added to staff.`);
     return newUser;
   };
 
   const updateUser = (user: User) => {
-    setUsers(prev => prev.map(u => (u.id === user.id ? user : u)));
+    const nextUsers = users.map(u => (u.id === user.id ? user : u));
+    setUsers(nextUsers);
+    syncUsersToServer(nextUsers);
     addAuditLog('Updated User Profile', 'User', user.id, `Updated profile for ${user.name}`);
     showToast('success', 'User Profile Saved', `Changes saved for ${user.name}`);
   };
@@ -372,7 +411,9 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const deleteUser = (userId: string) => {
     const target = users.find(user => user.id === userId);
     if (!target || target.id === currentUser.id) return;
-    setUsers(prev => prev.filter(user => user.id !== userId));
+    const nextUsers = users.filter(user => user.id !== userId);
+    setUsers(nextUsers);
+    syncUsersToServer(nextUsers);
     addAuditLog('Deleted User Account', 'User', userId, `Removed ${target.name} from staff accounts`);
     showToast('info', 'User Removed', `${target.name} no longer has access.`);
   };

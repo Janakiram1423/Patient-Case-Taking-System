@@ -22,6 +22,22 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+
+const normalizeUserList = (incoming: User[]) => {
+  const allUsers = incoming.filter(user => user.role !== 'patient');
+  const seen = new Set<string>();
+  return allUsers.filter(user => {
+    const key = `${user.role}:${user.email || user.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).map(user => ({
+    ...user,
+    name: user.role === 'doctor' ? 'Doctor' : user.role === 'patient' ? 'Patient' : user.name,
+    avatar: ''
+  }));
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const defaultDoctorUsers = INITIAL_USERS.filter(user => user.role === 'doctor');
@@ -30,13 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (saved) {
       try {
         const storedUsers: User[] = JSON.parse(saved);
-        const storedNonPatients = storedUsers.filter(user => user.role !== 'patient');
-        const storedUserIds = new Set(storedNonPatients.map(user => user.id));
-        return [...storedNonPatients, ...defaultDoctorUsers.filter(user => !storedUserIds.has(user.id))].map(user => ({
-          ...user,
-          name: user.role === 'doctor' ? 'Doctor' : user.role === 'patient' ? 'Patient' : user.name,
-          avatar: ''
-        }));
+        return normalizeUserList(storedUsers.length ? storedUsers : INITIAL_USERS.filter(user => user.role !== 'patient'));
       } catch (e) {
         return [...defaultDoctorUsers, ...INITIAL_USERS.filter(user => user.role === 'admin' || user.role === 'receptionist')];
       }
@@ -64,6 +74,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('clinicase_users', JSON.stringify(users));
   }, [users]);
+
+  useEffect(() => {
+    const loadUsersFromServer = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/admin/staff`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const nextUsers = normalizeUserList(data as User[]);
+          setUsers(nextUsers);
+          if (!nextUsers.some(user => user.id === currentUser.id)) {
+            setCurrentUser(nextUsers[0]);
+          }
+        }
+      } catch {
+        // Fall back to local cache if the backend is unavailable.
+      }
+    };
+
+    loadUsersFromServer();
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== 'clinicase_users' || !event.newValue) return;
+      try {
+        const storedUsers: User[] = JSON.parse(event.newValue);
+        setUsers(normalizeUserList(storedUsers));
+      } catch {
+        // Ignore malformed local data.
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [currentUser.id]);
 
   useEffect(() => {
     localStorage.setItem('clinicase_is_authenticated', String(isAuthenticated));
