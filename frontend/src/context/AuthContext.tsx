@@ -107,6 +107,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     loadUsersFromServer();
 
+    const handleUsersUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<User[]>;
+      const incomingUsers = Array.isArray(customEvent.detail) ? customEvent.detail : [];
+      if (incomingUsers.length > 0) {
+        setUsers(normalizeUserList(incomingUsers));
+      }
+    };
+
     const handleStorage = (event: StorageEvent) => {
       if (event.key !== 'clinicase_users' || !event.newValue) return;
       try {
@@ -117,8 +125,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    window.addEventListener('clinicase_users_updated', handleUsersUpdated);
     window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('clinicase_users_updated', handleUsersUpdated);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, [currentUser.id]);
 
   useEffect(() => {

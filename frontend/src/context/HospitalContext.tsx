@@ -401,11 +401,17 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const publishUsersUpdate = (nextUsers: User[]) => {
+    localStorage.setItem('clinicase_users', JSON.stringify(nextUsers));
+    window.dispatchEvent(new CustomEvent<User[]>('clinicase_users_updated', { detail: nextUsers }));
+  };
+
   const addUser = (userData: Omit<User, 'id'>): User => {
     const id = `${userData.role.slice(0, 3)}-${Date.now().toString().slice(-3)}`;
     const newUser: User = { ...userData, id };
     const nextUsers = [...users, newUser];
     setUsers(nextUsers);
+    publishUsersUpdate(nextUsers);
     syncUsersToServer(nextUsers);
     addAuditLog('Created User Account', 'User', id, `Added ${newUser.name} with role ${newUser.role}`);
     showToast('success', 'User Added', `${newUser.name} has been added to staff.`);
@@ -415,6 +421,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const updateUser = (user: User) => {
     const nextUsers = users.map(u => (u.id === user.id ? user : u));
     setUsers(nextUsers);
+    publishUsersUpdate(nextUsers);
     syncUsersToServer(nextUsers);
     addAuditLog('Updated User Profile', 'User', user.id, `Updated profile for ${user.name}`);
     showToast('success', 'User Profile Saved', `Changes saved for ${user.name}`);
@@ -425,6 +432,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (!target || target.id === currentUser.id) return;
     const nextUsers = users.filter(user => user.id !== userId);
     setUsers(nextUsers);
+    publishUsersUpdate(nextUsers);
     syncUsersToServer(nextUsers);
     addAuditLog('Deleted User Account', 'User', userId, `Removed ${target.name} from staff accounts`);
     showToast('info', 'User Removed', `${target.name} no longer has access.`);

@@ -579,12 +579,12 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
   };
 
   const steps = [
-    { num: 1, label: 'Symptoms', required: true, icon: <Sparkles className="w-4 h-4" /> },
+    { num: 1, label: 'Symptoms', icon: <Sparkles className="w-4 h-4" /> },
     { num: 2, label: 'History', icon: <FileText className="w-4 h-4" /> },
     { num: 3, label: 'Medical Background', icon: <Heart className="w-4 h-4" /> },
     { num: 4, label: 'Vitals & Exam', icon: <Activity className="w-4 h-4" /> },
     { num: 5, label: 'Tests', icon: <Stethoscope className="w-4 h-4" /> },
-    { num: 6, label: 'Diagnosis', required: true, icon: <ShieldAlert className="w-4 h-4" /> },
+    { num: 6, label: 'Diagnosis', icon: <ShieldAlert className="w-4 h-4" /> },
     { num: 7, label: 'Medicines & Follow-up', icon: <Pill className="w-4 h-4" /> }
   ];
   const visibleSteps = steps;
@@ -665,9 +665,8 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-4">
           <p className="text-[11px] leading-relaxed text-slate-500 max-w-2xl">
-            Save a draft at any time. For completion, enter the patient complaint and a provisional or final diagnosis; all other fields are optional.
+            Save a draft at any time. Add the patient complaint and diagnosis when ready; all other fields are optional.
           </p>
-          <span className="text-[10px] font-bold text-slate-400 shrink-0">Required: Symptoms + Diagnosis</span>
         </div>
 
         {/* Persistent Seven-Module Navigation */}
@@ -691,7 +690,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                 type="button"
                 onClick={() => setActiveStep(step.num)}
                 aria-current={isActive ? 'step' : undefined}
-                aria-label={`Step ${step.num}: ${step.label}${step.required ? ' (required to complete)' : ' (optional)'}`}
+                aria-label={`Step ${step.num}: ${step.label}`}
                 className={`flex min-w-[150px] items-center gap-2 p-2.5 rounded-xl text-xs font-bold transition-all text-left ${
                   isActive
                     ? 'bg-sky-600 text-white shadow-sm ring-2 ring-sky-200'
@@ -712,11 +711,6 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                   {isCompleted ? '✓' : index + 1}
                 </div>
                 <span className="min-w-0 truncate">{step.label}</span>
-                {step.required && (
-                  <span className={`shrink-0 text-[9px] uppercase tracking-wide ${isActive ? 'text-sky-100' : 'text-rose-600'}`}>
-                    Required
-                  </span>
-                )}
               </button>
             );
           })}
@@ -743,7 +737,6 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                   <Sparkles className="w-4 h-4 text-sky-600" />
                   Primary Chief Complaint
                 </h3>
-                <span className="text-xs text-rose-500 font-semibold">* Mandatory Field</span>
               </div>
 
               <div>

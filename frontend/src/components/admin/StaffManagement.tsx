@@ -34,7 +34,7 @@ export const StaffManagement: React.FC = () => {
 
     addUser({
       name: name.trim(),
-      email: email.trim() || `${name.toLowerCase().replace(/\s+/g, '')}@apexhealth.org`,
+      email: email.trim().toLowerCase(),
       role,
       department: role === 'doctor' ? department : undefined,
       phone: phone || '+91 98765-00000',
@@ -47,6 +47,7 @@ export const StaffManagement: React.FC = () => {
 
     setIsAddUserModalOpen(false);
     setName('');
+    setEmail('');
     setPassword('');
   };
 
@@ -190,6 +191,18 @@ export const StaffManagement: React.FC = () => {
                 className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Login Email</label>
+            <input
+              type="email"
+              required
+              placeholder="doctor@healthcare.org"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">

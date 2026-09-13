@@ -47,8 +47,8 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
   const inConsultationAppointments = myAppointments.filter(a => a.status === 'In Consultation');
   const completedCasesToday = cases.filter(c => c.created_at.startsWith(today) && (c.doctor_id === currentUser.id || c.doctor_name.includes(currentUser.name)));
 
-  // Recent Case Sheets
-  const recentCases = cases.slice(0, 5);
+  // Recent Case Sheets (default empty state)
+  const recentCases: CaseRecord[] = [];
 
   return (
     <div className="space-y-6">
@@ -103,7 +103,7 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Today's Appointments</p>
-            <h3 className="text-2xl font-black text-slate-900 mt-1">{myAppointments.length || 6}</h3>
+            <h3 className="text-2xl font-black text-slate-900 mt-1">{myAppointments.length}</h3>
             <p className="text-[11px] text-slate-400 mt-1">Scheduled for consultation</p>
           </div>
           <div className="w-11 h-11 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
@@ -114,7 +114,7 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
         <div className="bg-white rounded-2xl border border-amber-200 p-5 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-[11px] font-bold text-amber-800 uppercase tracking-wide">Waiting in Queue</p>
-            <h3 className="text-2xl font-black text-amber-900 mt-1">{waitingAppointments.length || 2}</h3>
+            <h3 className="text-2xl font-black text-amber-900 mt-1">{waitingAppointments.length}</h3>
             <p className="text-[11px] text-amber-700 mt-1">Ready for intake</p>
           </div>
           <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
@@ -125,7 +125,7 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
         <div className="bg-white rounded-2xl border border-emerald-200 p-5 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-[11px] font-bold text-emerald-800 uppercase tracking-wide">Completed Cases</p>
-            <h3 className="text-2xl font-black text-emerald-900 mt-1">{completedCasesToday.length || 4}</h3>
+            <h3 className="text-2xl font-black text-emerald-900 mt-1">{completedCasesToday.length}</h3>
             <p className="text-[11px] text-emerald-700 mt-1">Signed & documented</p>
           </div>
           <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
@@ -190,15 +190,6 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => onViewPatientTimeline(apt.patient_id)}
-                        className="p-1.5 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold"
-                        title="View Longitudinal History"
-                      >
-                        History
-                      </button>
-
-                      <button
-                        type="button"
                         onClick={() => onStartNewCase(apt.patient_id)}
                         className="inline-flex items-center gap-1 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition-colors shadow-2xs"
                       >
@@ -223,38 +214,42 @@ export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({
             </div>
 
             <div className="divide-y divide-slate-100 mt-2">
-              {recentCases.map(c => {
-                const patient = patients.find(p => p.patient_id === c.patient_id);
-                return (
-                  <div
-                    key={c.case_id}
-                    className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 rounded-xl px-2 transition-colors"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-slate-900 text-xs">{patient?.name || c.patient_id}</p>
-                        <span className="text-[10px] text-slate-400 font-mono">({c.case_id})</span>
-                        <Badge variant="neutral" size="sm">Visit #{c.visit_number}</Badge>
-                      </div>
-                      <p className="text-[11px] text-slate-600 mt-0.5">
-                        <span className="font-semibold text-slate-700">Diagnosis:</span> {c.diagnosis.final_diagnosis || c.chief_complaint.main_complaint}
-                      </p>
-                      <p className="text-[10px] text-slate-400">
-                        {formatDateTime(c.created_at)} • Prescribed {c.prescription.length} items
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setSelectedCaseForSheet(c)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-700 text-xs font-bold rounded-xl transition-colors shrink-0"
+              {recentCases.length === 0 ? (
+                <div className="p-8 text-center text-slate-500 text-xs">No recent clinical history available.</div>
+              ) : (
+                recentCases.map(c => {
+                  const patient = patients.find(p => p.patient_id === c.patient_id);
+                  return (
+                    <div
+                      key={c.case_id}
+                      className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 rounded-xl px-2 transition-colors"
                     >
-                      <Printer className="w-3.5 h-3.5" />
-                      View Sheet
-                    </button>
-                  </div>
-                );
-              })}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-slate-900 text-xs">{patient?.name || c.patient_id}</p>
+                          <span className="text-[10px] text-slate-400 font-mono">({c.case_id})</span>
+                          <Badge variant="neutral" size="sm">Visit #{c.visit_number}</Badge>
+                        </div>
+                        <p className="text-[11px] text-slate-600 mt-0.5">
+                          <span className="font-semibold text-slate-700">Diagnosis:</span> {c.diagnosis.final_diagnosis || c.chief_complaint.main_complaint}
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          {formatDateTime(c.created_at)} • Prescribed {c.prescription.length} items
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCaseForSheet(c)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-700 text-xs font-bold rounded-xl transition-colors shrink-0"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        View Sheet
+                      </button>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
