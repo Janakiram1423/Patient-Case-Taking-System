@@ -440,20 +440,18 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const resetToDefaultData = () => {
     localStorage.removeItem('clinicase_hospital_info');
-    localStorage.removeItem('clinicase_patients');
     localStorage.removeItem('clinicase_appointments');
     localStorage.removeItem('clinicase_cases');
     localStorage.removeItem('clinicase_audit_logs');
     localStorage.removeItem('clinicase_users');
 
     setHospitalInfo(INITIAL_HOSPITAL_INFO);
-    setPatients([]);
     setAppointments([]);
     setCases([]);
     setAuditLogs([]);
     setUsers(INITIAL_USERS.filter(user => user.role !== 'patient'));
 
-    showToast('info', 'Demo Data Restored', 'All sample clinical records, patients, and audit trails reset.');
+    showToast('info', 'Demo Data Restored', 'Sample clinical records and audit trails reset. Patient records were preserved.');
   };
 
   return (
