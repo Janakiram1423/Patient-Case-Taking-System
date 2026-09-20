@@ -46,8 +46,8 @@ class InMemoryHospitalStore:
             },
             {
                 "id": "rec-01",
-                "name": "Priya Sharma",
-                "email": "priya.sharma@apexhealth.org",
+                "name": "Reception",
+                "email": "reception@apexhealth.org",
                 "role": "receptionist",
                 "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=256",
                 "department": "Front Desk & Patient Triage",
@@ -57,7 +57,7 @@ class InMemoryHospitalStore:
             },
             {
                 "id": "adm-01",
-                "name": "Dr. Robert Vance",
+                "name": "Admin",
                 "email": "admin@apexhealth.org",
                 "role": "admin",
                 "avatar": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=256",
@@ -287,7 +287,7 @@ class InMemoryHospitalStore:
                 "id": "LOG-1002",
                 "timestamp": datetime.now().isoformat() + "Z",
                 "user_id": "rec-01",
-                "user_name": "Priya Sharma",
+                "user_name": "Reception",
                 "role": "receptionist",
                 "action": "QUEUE_APPOINTMENT",
                 "module": "OPD Appointments",

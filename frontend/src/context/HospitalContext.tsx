@@ -63,7 +63,11 @@ const API_BASE_URL = getApiBaseUrl();
 const normalizeStaffUsers = (incoming: User[]) =>
   incoming
     .filter(user => user.role !== 'patient')
-    .map(user => ({ ...user, avatar: '' }));
+    .map(user => ({
+      ...user,
+      name: user.role === 'receptionist' ? 'Reception' : user.role === 'admin' ? 'Admin' : user.name,
+      avatar: ''
+    }));
 
 export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
