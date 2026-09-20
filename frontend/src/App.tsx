@@ -132,6 +132,7 @@ const MainAppContent: React.FC = () => {
                     <ReceptionDashboard
                       onOpenRegisterPatient={() => setIsRegisterPatientOpen(true)}
                       onOpenAppointments={() => setActiveTab('appointments')}
+                      onOpenRedFlagDetection={() => setIsEmergencyModalOpen(true)}
                     />
                   )}
 

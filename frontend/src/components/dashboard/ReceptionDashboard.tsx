@@ -7,7 +7,8 @@ import {
   CheckCircle2,
   Phone,
   Ticket,
-  ShieldCheck
+  ShieldCheck,
+  ShieldAlert
 } from 'lucide-react';
 import { useHospital } from '../../context/HospitalContext';
 import { Badge } from '../common/Badge';
@@ -15,11 +16,13 @@ import { Badge } from '../common/Badge';
 interface ReceptionDashboardProps {
   onOpenRegisterPatient: () => void;
   onOpenAppointments: () => void;
+  onOpenRedFlagDetection: () => void;
 }
 
 export const ReceptionDashboard: React.FC<ReceptionDashboardProps> = ({
   onOpenRegisterPatient,
-  onOpenAppointments
+  onOpenAppointments,
+  onOpenRedFlagDetection
 }) => {
   const { patients, appointments, users, addAppointment } = useHospital();
 
@@ -43,7 +46,14 @@ export const ReceptionDashboard: React.FC<ReceptionDashboardProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap justify-end">
+          <button
+            onClick={onOpenRedFlagDetection}
+            className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-rose-600 text-white font-extrabold text-xs shadow-lg hover:bg-rose-700 transition-all"
+          >
+            <ShieldAlert className="w-4 h-4" />
+            Red-Flag Detection
+          </button>
           <button
             onClick={onOpenRegisterPatient}
             className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white text-emerald-800 font-extrabold text-xs shadow-lg hover:bg-emerald-50 transition-all"
