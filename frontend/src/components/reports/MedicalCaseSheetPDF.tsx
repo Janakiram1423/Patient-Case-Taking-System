@@ -33,6 +33,7 @@ export const MedicalCaseSheetPDF: React.FC<MedicalCaseSheetPDFProps> = ({
   onClose
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const reportPatient = caseRecord.patient_details || patient;
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showMultilingualModal, setShowMultilingualModal] = useState(false);
   const { showToast } = useToast();
@@ -56,8 +57,8 @@ export const MedicalCaseSheetPDF: React.FC<MedicalCaseSheetPDFProps> = ({
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`CaseSheet_${patient.patient_id}_Visit${caseRecord.visit_number}.pdf`);
-      showToast('success', 'PDF Downloaded', `Saved medical case sheet for ${patient.name}`);
+      pdf.save(`CaseSheet_${reportPatient.patient_id}_Visit${caseRecord.visit_number}.pdf`);
+      showToast('success', 'PDF Downloaded', `Saved medical case sheet for ${reportPatient.name}`);
     } catch (err) {
       console.error(err);
       showToast('error', 'Export Failed', 'Could not generate PDF.');
@@ -75,7 +76,7 @@ export const MedicalCaseSheetPDF: React.FC<MedicalCaseSheetPDFProps> = ({
           <div>
             <h4 className="font-bold text-sm">Official Clinical Case Sheet</h4>
             <p className="text-[11px] text-slate-400">
-              {caseRecord.case_id} • Visit #{caseRecord.visit_number} • {patient.name}
+              {caseRecord.case_id} • Visit #{caseRecord.visit_number} • {reportPatient.name}
             </p>
           </div>
         </div>
@@ -185,35 +186,39 @@ export const MedicalCaseSheetPDF: React.FC<MedicalCaseSheetPDFProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div>
               <span className="text-slate-500 block text-[11px]">Patient Name:</span>
-              <span className="font-bold text-slate-950 text-sm">{patient.name}</span>
+              <span className="font-bold text-slate-950 text-sm">{reportPatient.name}</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[11px]">Patient ID:</span>
-              <span className="font-mono font-bold text-slate-900">{patient.patient_id}</span>
+              <span className="font-mono font-bold text-slate-900">{reportPatient.patient_id}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block text-[11px]">UHID:</span>
+              <span className="font-mono font-bold text-teal-800">{reportPatient.uhid}</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[11px]">Age / Gender:</span>
-              <span className="font-bold text-slate-900">{patient.age} Yrs / {patient.gender}</span>
+              <span className="font-bold text-slate-900">{reportPatient.age} Yrs / {reportPatient.gender}</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[11px]">Blood Group:</span>
-              <span className="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">{patient.blood_group}</span>
+              <span className="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">{reportPatient.blood_group}</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[11px]">Contact Phone:</span>
-              <span className="font-semibold text-slate-800">{patient.phone}</span>
+              <span className="font-semibold text-slate-800">{reportPatient.phone}</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[11px]">City / Address:</span>
-              <span className="font-semibold text-slate-800">{patient.city}</span>
+              <span className="font-semibold text-slate-800">{reportPatient.city}</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[11px]">Emergency Contact:</span>
-              <span className="font-semibold text-slate-800">{patient.emergency_contact?.name} ({patient.emergency_contact?.relation})</span>
+              <span className="font-semibold text-slate-800">{reportPatient.emergency_contact?.name} ({reportPatient.emergency_contact?.relation})</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[11px]">Insurance Policy:</span>
-              <span className="font-semibold text-slate-800">{patient.insurance_provider || 'Self Pay'}</span>
+              <span className="font-semibold text-slate-800">{reportPatient.insurance_provider || 'Self Pay'}</span>
             </div>
           </div>
         </div>

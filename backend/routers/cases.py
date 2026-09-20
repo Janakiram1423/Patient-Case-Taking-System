@@ -8,6 +8,24 @@ from database.store import db_store
 
 router = APIRouter(prefix="/api/cases", tags=["Cases"])
 
+async def case_with_patient_details(case: dict, db) -> dict:
+    if case.get("patient_details"):
+        return case
+
+    patient_details = None
+    if db is not None:
+        try:
+            patient_details = clean_mongo_doc(await db.patients.find_one({"patient_id": case.get("patient_id")}))
+        except Exception:
+            patient_details = None
+    if not patient_details:
+        patient_details = next(
+            (patient for patient in db_store.patients if patient.get("patient_id", "").lower() == case.get("patient_id", "").lower()),
+            None
+        )
+
+    return {**case, "patient_details": patient_details}
+
 @router.get("", response_model=List[CaseRecord])
 async def get_all_cases(
     patient_id: Optional[str] = Query(None, description="Filter by Patient ID"),
@@ -23,7 +41,7 @@ async def get_all_cases(
                 query["doctor_id"] = doctor_id
             cursor = db.cases.find(query).sort("created_at", -1)
             docs = await cursor.to_list(length=200)
-            return clean_mongo_docs(docs)
+            return [await case_with_patient_details(case, db) for case in clean_mongo_docs(docs)]
         except Exception:
             pass
 
@@ -32,7 +50,7 @@ async def get_all_cases(
         cases = [c for c in cases if c["patient_id"].lower() == patient_id.lower()]
     if doctor_id:
         cases = [c for c in cases if c["doctor_id"].lower() == doctor_id.lower()]
-    return cases
+    return [await case_with_patient_details(case, db) for case in cases]
 
 @router.get("/{case_id}", response_model=CaseRecord)
 async def get_case_by_id(case_id: str):
@@ -41,18 +59,31 @@ async def get_case_by_id(case_id: str):
         try:
             doc = await db.cases.find_one({"case_id": {"$regex": f"^{case_id}$", "$options": "i"}})
             if doc:
-                return clean_mongo_doc(doc)
+                return await case_with_patient_details(clean_mongo_doc(doc), db)
         except Exception:
             pass
 
     for c in db_store.cases:
         if c["case_id"].lower() == case_id.lower():
-            return c
+            return await case_with_patient_details(c, db)
     raise HTTPException(status_code=404, detail="Case record not found")
 
 @router.post("", response_model=CaseRecord, status_code=201)
 async def create_case(payload: CaseRecordCreate):
     db = get_db()
+
+    patient_details = payload.patient_details
+    if not patient_details:
+        if db is not None:
+            try:
+                patient_details = clean_mongo_doc(await db.patients.find_one({"patient_id": payload.patient_id}))
+            except Exception:
+                patient_details = None
+        if not patient_details:
+            patient_details = next(
+                (patient for patient in db_store.patients if patient.get("patient_id", "").lower() == payload.patient_id.lower()),
+                None
+            )
     
     # Calculate unique case_id & visit number
     visit_num = 1
@@ -74,6 +105,7 @@ async def create_case(payload: CaseRecordCreate):
     created_at_str = datetime.now().isoformat() + "Z"
 
     case_dict = payload.model_dump()
+    case_dict["patient_details"] = patient_details
     case_dict["case_id"] = new_case_id
     case_dict["visit_number"] = visit_num
     case_dict["created_at"] = created_at_str

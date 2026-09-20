@@ -423,6 +423,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
       visit_number: number;
     } = {
       patient_id: selectedPatient.patient_id,
+      patient_details: selectedPatient,
       doctor_id: currentUser.id,
       doctor_name: currentUser.name,
       department: currentUser.department || 'General Medicine',

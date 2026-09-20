@@ -143,6 +143,7 @@ class Diagnosis(BaseModel):
 
 class CaseRecordCreate(BaseModel):
     patient_id: str
+    patient_details: Optional[Dict[str, Any]] = None
     doctor_id: str
     doctor_name: str
     department: str

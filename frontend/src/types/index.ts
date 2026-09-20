@@ -298,6 +298,7 @@ export interface FollowUp {
 export interface CaseRecord {
   case_id: string;
   patient_id: string;
+  patient_details?: Patient;
   doctor_id: string;
   doctor_name: string;
   department: string;

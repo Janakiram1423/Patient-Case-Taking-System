@@ -140,6 +140,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       .filter(caseRecord => !demoPatientIds.has(caseRecord.patient_id))
       .map(caseRecord => ({
         ...caseRecord,
+        patient_details: caseRecord.patient_details || patients.find(patient => patient.patient_id === caseRecord.patient_id),
         doctor_name: 'Doctor',
         doctor_signature: caseRecord.doctor_signature || 'Doctor'
       }));
@@ -358,6 +359,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const recordToSave: CaseRecord = {
       ...caseData,
+      patient_details: caseData.patient_details || patients.find(patient => patient.patient_id === caseData.patient_id),
       case_id: caseId,
       visit_number: visitNumber,
       created_at: isNew ? now : (cases.find(c => c.case_id === caseId)?.created_at || now),
