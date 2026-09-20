@@ -87,7 +87,18 @@ export interface PreConsultationIntake {
   preferred_language: string;
   care_mode: 'Allopathy' | 'AYUSH';
   ayush_profile?: AyushProfile;
+  guided_answers: Record<string, string>;
+  prior_documents: PriorDocument[];
   submitted_at: string;
+}
+
+export interface PriorDocument {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  uploaded_at: string;
+  extracted_text?: string;
 }
 
 export type AppointmentStatus = 'Scheduled' | 'Waiting' | 'In Consultation' | 'Completed' | 'Cancelled' | 'No Show';

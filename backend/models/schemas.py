@@ -26,6 +26,8 @@ class PreConsultationIntake(BaseModel):
     preferred_language: str = "en-IN"
     care_mode: str = "Allopathy"
     ayush_profile: Optional[AyushProfile] = None
+    guided_answers: Dict[str, str] = Field(default_factory=dict)
+    prior_documents: List[Dict[str, Any]] = Field(default_factory=list)
     submitted_at: str
 
 class PatientBase(BaseModel):
