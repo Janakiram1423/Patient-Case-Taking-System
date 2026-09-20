@@ -52,7 +52,7 @@ export const INITIAL_USERS: User[] = [
   {
     id: 'rec-01',
     name: 'Reception',
-    email: 'priya.sharma@apexhealth.org',
+    email: 'reception@apexhealth.org',
     role: 'receptionist',
     avatar: '',
     department: 'Front Desk & Patient Triage',

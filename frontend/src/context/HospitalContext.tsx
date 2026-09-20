@@ -78,8 +78,6 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     .replaceAll('Dr. Sarah Chen', 'Doctor')
     .replaceAll('Dr. Rajesh Verma', 'Doctor')
     .replaceAll('Dr. Emily Watson', 'Doctor')
-    .replaceAll('Dr. Robert Vance', 'Admin')
-    .replaceAll('Priya Sharma', 'Reception')
     .replaceAll('Alex Mercer', 'Patient')
     .replaceAll('Sunita Mehra', 'Patient')
     .replaceAll('Vikramaditya Rao', 'Patient')
