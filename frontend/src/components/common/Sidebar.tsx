@@ -30,6 +30,7 @@ export type ActiveTab =
   | 'ai-assistant'
   | 'analytics'
   | 'staff'
+  | 'patient-registry'
   | 'audit-logs'
   | 'settings'
   | 'formulary'
@@ -122,6 +123,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       id: 'staff',
       label: 'Doctor & Staff Roster',
       icon: <UserCog className="w-4 h-4" />
+    },
+    {
+      id: 'patient-registry',
+      label: 'Patient Registry',
+      icon: <Users className="w-4 h-4 text-rose-500" />,
+      badge: `${patients.length}`
     },
     {
       id: 'cases',

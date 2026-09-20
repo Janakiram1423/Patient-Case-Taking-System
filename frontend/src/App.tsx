@@ -20,6 +20,7 @@ import { NewCaseTaking } from './components/cases/NewCaseTaking';
 import { MedicalCaseSheetPDF } from './components/reports/MedicalCaseSheetPDF';
 import { AICaseAssistantView } from './components/ai/AICaseAssistantModal';
 import { StaffManagement } from './components/admin/StaffManagement';
+import { PatientRegistry } from './components/admin/PatientRegistry';
 import { AuditLogViewer } from './components/admin/AuditLogViewer';
 import { HospitalSettings } from './components/admin/HospitalSettings';
 import { AnalyticsView } from './components/admin/AnalyticsView';
@@ -288,6 +289,9 @@ const MainAppContent: React.FC = () => {
 
               {/* ADMIN: STAFF ROSTER */}
               {activeTab === 'staff' && <StaffManagement />}
+
+              {/* ADMIN: PATIENT REGISTRY */}
+              {activeTab === 'patient-registry' && <PatientRegistry />}
 
               {/* ADMIN: AUDIT LOGS */}
               {activeTab === 'audit-logs' && <AuditLogViewer />}
