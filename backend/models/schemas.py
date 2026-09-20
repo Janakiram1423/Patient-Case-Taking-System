@@ -6,7 +6,31 @@ class EmergencyContact(BaseModel):
     phone: str = ""
     relation: str = ""
 
+class AyushProfile(BaseModel):
+    prakriti: str = ""
+    vikriti: str = ""
+    agni: str = ""
+    koshtha: str = ""
+    ahara_vihara: str = ""
+    nidana: str = ""
+    samprapti: str = ""
+    dashavidha_notes: str = ""
+
+class PreConsultationIntake(BaseModel):
+    chief_complaint: str
+    duration: str = ""
+    severity: str = "Moderate"
+    symptoms: str
+    prior_records_summary: str = ""
+    red_flags: List[str] = Field(default_factory=list)
+    preferred_language: str = "en-IN"
+    care_mode: str = "Allopathy"
+    ayush_profile: Optional[AyushProfile] = None
+    submitted_at: str
+
 class PatientBase(BaseModel):
+    uhid: str = ""
+    registration_number: Optional[str] = ""
     name: str
     dob: str
     age: int
@@ -19,6 +43,13 @@ class PatientBase(BaseModel):
     emergency_contact: Optional[EmergencyContact] = Field(default_factory=EmergencyContact)
     known_allergies: List[str] = Field(default_factory=list)
     chronic_conditions: List[str] = Field(default_factory=list)
+    abha_id: Optional[str] = ""
+    preferred_language: Optional[str] = "en-IN"
+    consent_given: bool = False
+    consent_granted_at: Optional[str] = ""
+    consent_scope: List[str] = Field(default_factory=list)
+    care_mode: str = "Allopathy"
+    pre_consultation: Optional[PreConsultationIntake] = None
 
 class PatientCreate(PatientBase):
     patient_id: Optional[str] = None

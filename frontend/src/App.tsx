@@ -12,6 +12,7 @@ import { PatientDashboard } from './components/dashboard/PatientDashboard';
 import { PatientTimeline } from './components/patients/PatientTimeline';
 import { PatientHistoryView } from './components/patients/PatientHistoryView';
 import { PatientRegistrationView } from './components/patients/PatientRegistrationView';
+import { PreConsultationIntake } from './components/patients/PreConsultationIntake';
 import { PatientRegistrationModal } from './components/patients/PatientRegistrationModal';
 import { AppointmentList } from './components/appointments/AppointmentList';
 import { TodaysQueue } from './components/appointments/TodaysQueue';
@@ -25,10 +26,9 @@ import { AnalyticsView } from './components/admin/AnalyticsView';
 import { DrugCatalogExplorer } from './components/clinical/DrugCatalogExplorer';
 import { EmergencyTriageModal } from './components/clinical/EmergencyTriageModal';
 import { PediatricCalculatorModal } from './components/clinical/PediatricCalculatorModal';
-import { ClinicalVoiceScribeModal } from './components/clinical/ClinicalVoiceScribeModal';
 import { LabReportScannerModal } from './components/clinical/LabReportScannerModal';
 import { Modal } from './components/common/Modal';
-import { CaseRecord, Patient, ParsedClinicalVoiceData, Investigation } from './types';
+import { CaseRecord, Patient, Investigation } from './types';
 import { FileText, Printer, Stethoscope, Clock3, CalendarCheck2 } from 'lucide-react';
 import { formatDate, formatDateTime } from './utils/formatters';
 import { Badge } from './components/common/Badge';
@@ -44,9 +44,7 @@ const MainAppContent: React.FC = () => {
   const [caseTakingPatientId, setCaseTakingPatientId] = useState<string | undefined>(undefined);
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
   const [isPediatricModalOpen, setIsPediatricModalOpen] = useState(false);
-  const [isGlobalVoiceScribeOpen, setIsGlobalVoiceScribeOpen] = useState(false);
   const [isGlobalLabScannerOpen, setIsGlobalLabScannerOpen] = useState(false);
-  const [pendingVoiceData, setPendingVoiceData] = useState<ParsedClinicalVoiceData | null>(null);
 
   if (!isAuthenticated) {
     return <LoginScreen />;
@@ -57,18 +55,8 @@ const MainAppContent: React.FC = () => {
     setSelectedPatientTimelineId(patientId);
   };
 
-  const handleStartNewCase = (patientId?: string, voiceData?: ParsedClinicalVoiceData | null) => {
+  const handleStartNewCase = (patientId?: string) => {
     setCaseTakingPatientId(patientId || (patients.length > 0 ? patients[0].patient_id : undefined));
-    setSelectedPatientTimelineId(null);
-    if (voiceData) {
-      setPendingVoiceData(voiceData);
-    }
-    setActiveTab('new-case');
-  };
-
-  const handleApplyVoiceToCase = (data: ParsedClinicalVoiceData) => {
-    setPendingVoiceData(data);
-    setIsGlobalVoiceScribeOpen(false);
     setSelectedPatientTimelineId(null);
     setActiveTab('new-case');
   };
@@ -88,13 +76,11 @@ const MainAppContent: React.FC = () => {
       {/* Top Navigation */}
       <Navbar
         onOpenNewPatientModal={() => setIsRegisterPatientOpen(true)}
-        onOpenNewCaseModal={() => handleStartNewCase()}
         onSelectPatient={patientId => handleOpenTimeline(patientId)}
         onSelectCase={caseId => {
           const found = cases.find(c => c.case_id === caseId);
           if (found) setSelectedCaseForReport(found);
         }}
-        onOpenVoiceScribe={() => setIsGlobalVoiceScribeOpen(true)}
       />
 
       <div className="flex-1 flex flex-col lg:flex-row max-w-7xl w-full mx-auto min-w-0">
@@ -152,7 +138,7 @@ const MainAppContent: React.FC = () => {
                     <AdminDashboard onNavigateTab={tab => setActiveTab(tab)} />
                   )}
 
-                  {currentRole === 'patient' && <PatientDashboard />}
+                  {currentRole === 'patient' && <PatientDashboard onOpenPreConsultation={() => setActiveTab('pre-consultation')} />}
                 </>
               )}
 
@@ -173,10 +159,8 @@ const MainAppContent: React.FC = () => {
 
                   <NewCaseTaking
                     initialPatientId={caseTakingPatientId}
-                    initialVoiceData={pendingVoiceData}
                     onFinishCase={handleCaseFinished}
                     onCancel={() => {
-                      setPendingVoiceData(null);
                       setActiveTab('dashboard');
                     }}
                   />
@@ -331,6 +315,11 @@ const MainAppContent: React.FC = () => {
                   patient={patients.find(p => p.patient_id === currentUser.patientId) || patients[0]}
                 />
               )}
+              {activeTab === 'pre-consultation' && (
+                <PreConsultationIntake
+                  patient={patients.find(p => p.patient_id === currentUser.patientId) || patients[0]}
+                />
+              )}
             </>
           )}
         </main>
@@ -355,13 +344,6 @@ const MainAppContent: React.FC = () => {
         onPatientCreated={newPatient => {
           handleOpenTimeline(newPatient.patient_id);
         }}
-      />
-
-      {/* Global AI Multi-Lingual Voice Clinical Scribe Studio Modal */}
-      <ClinicalVoiceScribeModal
-        isOpen={isGlobalVoiceScribeOpen}
-        onClose={() => setIsGlobalVoiceScribeOpen(false)}
-        onApplyToCase={handleApplyVoiceToCase}
       />
 
       {/* Global AI Diagnostic Lab Report Scanner Modal */}

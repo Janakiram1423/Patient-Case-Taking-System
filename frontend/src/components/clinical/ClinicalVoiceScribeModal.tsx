@@ -181,8 +181,10 @@ export const ClinicalVoiceScribeModal: React.FC<ClinicalVoiceScribeModalProps> =
           setIsRecording(false);
           if (error === 'not-allowed') {
             showToast('error', 'Microphone Denied', 'Please grant browser microphone permission to speak.');
+          } else if (error === 'network') {
+            showToast('error', 'Voice service unavailable', 'Live browser dictation was interrupted. Use a demonstration scenario below or check your internet connection.');
           } else {
-            showToast('info', 'Microphone Idle', 'No speech detected or network interrupted.');
+            showToast('warning', 'Voice dictation stopped', 'No usable speech was received. Check your microphone and try again, or use a demonstration scenario below.');
           }
         },
         () => {

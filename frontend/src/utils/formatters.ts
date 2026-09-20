@@ -60,10 +60,40 @@ export function calculateAge(dobString?: string): number {
   }
 }
 
-export function generatePatientId(existingCount: number = 0): string {
+export function generatePatientId(existingIds: Iterable<string> = []): string {
   const year = new Date().getFullYear();
-  const nextNum = (existingCount + 1).toString().padStart(4, '0');
-  return `PAT-${year}-${nextNum}`;
+  let highestNumber = 0;
+
+  for (const patientId of existingIds) {
+    const match = patientId.match(/^PAT-\d{4}-(\d+)$/);
+    if (match) highestNumber = Math.max(highestNumber, Number(match[1]));
+  }
+
+  return `PAT-${year}-${(highestNumber + 1).toString().padStart(4, '0')}`;
+}
+
+export function generateRegistrationNumber(existingNumbers: Iterable<string> = []): string {
+  const year = new Date().getFullYear();
+  let highestNumber = 0;
+
+  for (const regNumber of existingNumbers) {
+    const match = regNumber.match(/^REG-\d{4}-(\d+)$/);
+    if (match) highestNumber = Math.max(highestNumber, Number(match[1]));
+  }
+
+  return `REG-${year}-${(highestNumber + 1).toString().padStart(4, '0')}`;
+}
+
+export function generateUHID(existingUHIDs: Iterable<string> = []): string {
+  const year = new Date().getFullYear();
+  let highestNumber = 0;
+
+  for (const uhid of existingUHIDs) {
+    const match = uhid.match(/^UHID-\d{4}-(\d+)$/);
+    if (match) highestNumber = Math.max(highestNumber, Number(match[1]));
+  }
+
+  return `UHID-${year}-${(highestNumber + 1).toString().padStart(4, '0')}`;
 }
 
 export function generateCaseId(patientId: string, visitNumber: number): string {

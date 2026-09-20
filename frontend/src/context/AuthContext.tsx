@@ -10,7 +10,7 @@ interface AuthContextValue {
   switchUser: (userId: string) => void;
   switchRole: (role: UserRole) => void;
   login: (email: string, role?: UserRole) => boolean;
-  registerPatient: (email: string, name: string, patientId: string, password: string) => boolean;
+  registerPatient: (email: string, name: string, patientId: string, password: string, signIn?: boolean) => boolean;
   logout: () => void;
   canViewClinicalRecords: boolean;
   canCreateCase: boolean;
@@ -37,7 +37,7 @@ const getApiBaseUrl = () => {
 const API_BASE_URL = getApiBaseUrl();
 
 const normalizeUserList = (incoming: User[]) => {
-  const allUsers = incoming.filter(user => user.role !== 'patient');
+  const allUsers = incoming;
   const seen = new Set<string>();
   return allUsers.filter(user => {
     const key = `${user.role}:${user.email || user.id}`;
@@ -166,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   };
 
-  const registerPatient = (email: string, name: string, patientId: string, password: string): boolean => {
+  const registerPatient = (email: string, name: string, patientId: string, password: string, signIn = true): boolean => {
     const normalizedEmail = email.trim().toLowerCase();
     if (users.some(user => user.email.toLowerCase() === normalizedEmail)) return false;
 
@@ -183,8 +183,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUsers(prev => [...prev, newUser]);
-    setCurrentUser(newUser);
-    setIsAuthenticated(true);
+    if (signIn) {
+      setCurrentUser(newUser);
+      setIsAuthenticated(true);
+    }
     return true;
   };
 

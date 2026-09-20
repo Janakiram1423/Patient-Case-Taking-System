@@ -12,6 +12,7 @@ import {
   FileText,
   Clock3,
   HeartPulse,
+  ClipboardCheck,
   LogOut,
   Stethoscope
 } from 'lucide-react';
@@ -33,7 +34,8 @@ export type ActiveTab =
   | 'settings'
   | 'formulary'
   | 'my-records'
-  | 'my-timeline';
+  | 'my-timeline'
+  | 'pre-consultation';
 
 interface SidebarProps {
   activeTab: ActiveTab;
@@ -64,9 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     {
       id: 'patient-registration',
       label: 'Patient Registration',
-      icon: <Users className="w-4 h-4 text-emerald-500" />,
-      badge: 'New',
-      badgeColor: 'bg-emerald-100 text-emerald-800'
+      icon: <Users className="w-4 h-4 text-emerald-500" />
     },
     {
       id: 'patient-history',
@@ -76,8 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     {
       id: 'new-case',
       label: 'Digital Case Taking Form',
-      icon: <FilePlus2 className="w-4 h-4 text-sky-500" />,
-      badge: 'Start'
+      icon: <FilePlus2 className="w-4 h-4 text-sky-500" />
     },
     {
       id: 'todays-queue',
@@ -157,6 +156,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       id: 'my-timeline',
       label: 'My Clinical Timeline',
       icon: <Clock3 className="w-4 h-4 text-emerald-500" />
+    },
+    {
+      id: 'pre-consultation',
+      label: 'Pre-consultation Intake',
+      icon: <ClipboardCheck className="w-4 h-4 text-teal-500" />
     }
   ];
 

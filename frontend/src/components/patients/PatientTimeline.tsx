@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ArrowRight,
   Languages
+  , Clipboard
 } from 'lucide-react';
 import { Patient, CaseRecord } from '../../types';
 import { useHospital } from '../../context/HospitalContext';
@@ -31,6 +32,13 @@ export const PatientTimeline: React.FC<PatientTimelineProps> = ({ patient, onSta
   const cases = getPatientCases(patient.patient_id);
   const [selectedCaseForReport, setSelectedCaseForReport] = useState<CaseRecord | null>(null);
   const [selectedCaseForDischarge, setSelectedCaseForDischarge] = useState<CaseRecord | null>(null);
+  const [numberCopied, setNumberCopied] = useState(false);
+
+  const copyPatientNumber = async () => {
+    await navigator.clipboard.writeText(patient.patient_id);
+    setNumberCopied(true);
+    window.setTimeout(() => setNumberCopied(false), 1600);
+  };
 
 
   return (
@@ -45,9 +53,23 @@ export const PatientTimeline: React.FC<PatientTimelineProps> = ({ patient, onSta
             <h2 className="text-base font-bold text-slate-900">
               Longitudinal Clinical Timeline — {patient.name}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {patient.patient_id} • {patient.age}y {patient.gender} • Blood Group: {patient.blood_group} • Total Recorded Visits: {cases.length}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-slate-500">
+              <span className="font-semibold text-slate-600">Patient Number:</span>
+              <span className="font-mono font-bold text-sky-800">{patient.patient_id}</span>
+              <span className="font-semibold text-slate-600">UHID:</span>
+              <span className="font-mono font-bold text-teal-800">{patient.uhid}</span>
+              <button
+                type="button"
+                onClick={copyPatientNumber}
+                title="Copy patient number"
+                aria-label="Copy patient number"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold transition-colors"
+              >
+                <Clipboard className="w-3 h-3" />
+                {numberCopied ? 'Copied' : 'Copy'}
+              </button>
+              <span>• {patient.age}y {patient.gender} • Blood Group: {patient.blood_group} • Total Recorded Visits: {cases.length}</span>
+            </div>
           </div>
         </div>
 

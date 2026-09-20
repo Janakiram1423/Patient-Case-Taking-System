@@ -18,13 +18,13 @@ import {
 } from '../data/initialData';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
-import { generatePatientId, generateCaseId } from '../utils/formatters';
+import { generatePatientId, generateRegistrationNumber, generateUHID, generateCaseId } from '../utils/formatters';
 
 interface HospitalContextValue {
   hospitalInfo: HospitalInfo;
   updateHospitalInfo: (info: HospitalInfo) => void;
   patients: Patient[];
-  addPatient: (patientData: Omit<Patient, 'patient_id' | 'created_at' | 'updated_at' | 'registered_by'>) => Patient | null;
+  addPatient: (patientData: Omit<Patient, 'patient_id' | 'uhid' | 'created_at' | 'updated_at' | 'registered_by'> & { uhid?: string }) => Patient | null;
   updatePatient: (patient: Patient) => void;
   deletePatient: (patientId: string) => void;
   getPatientById: (patientId: string) => Patient | undefined;
@@ -97,14 +97,30 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [patients, setPatients] = useState<Patient[]>(() => {
     const saved = localStorage.getItem('clinicase_patients');
     const storedPatients: Patient[] = saved ? JSON.parse(saved) : INITIAL_PATIENTS;
+    const usedPatientIds = new Set<string>();
+    const usedUHIDs = new Set<string>();
+
     return storedPatients
       .filter(patient => !demoPatientIds.has(patient.patient_id))
-      .map(({ avatar_url: _avatarUrl, ...patient }) => ({
-        ...patient,
-        name: 'Patient',
-        emergency_contact: { ...patient.emergency_contact, name: 'Emergency Contact' },
-        registered_by: 'Reception'
-      }));
+      .map(({ avatar_url: _avatarUrl, ...patient }) => {
+        const patientId = patient.patient_id && !usedPatientIds.has(patient.patient_id)
+          ? patient.patient_id
+          : generatePatientId(usedPatientIds);
+        usedPatientIds.add(patientId);
+        const uhid = patient.uhid && !usedUHIDs.has(patient.uhid)
+          ? patient.uhid
+          : generateUHID(usedUHIDs);
+        usedUHIDs.add(uhid);
+
+        return {
+          ...patient,
+          patient_id: patientId,
+          uhid,
+          name: 'Patient',
+          emergency_contact: { ...patient.emergency_contact, name: 'Emergency Contact' },
+          registered_by: 'Reception'
+        };
+      });
   });
 
   // 3. Appointments
@@ -221,7 +237,7 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   // Patient Management
-  const addPatient = (patientData: Omit<Patient, 'patient_id' | 'created_at' | 'updated_at' | 'registered_by'>): Patient | null => {
+  const addPatient = (patientData: Omit<Patient, 'patient_id' | 'uhid' | 'created_at' | 'updated_at' | 'registered_by'> & { uhid?: string }): Patient | null => {
     // Duplicate Phone Check
     const existingPhone = patients.find(p => p.phone.replace(/\D/g, '') === patientData.phone.replace(/\D/g, ''));
     if (existingPhone) {
@@ -229,11 +245,15 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return null;
     }
 
-    const patientId = generatePatientId(patients.length);
+    const patientId = generatePatientId(patients.map(patient => patient.patient_id));
+    const registrationNumber = patientData.registration_number || generateRegistrationNumber(patients.map(patient => patient.registration_number || ''));
+    const uhid = patientData.uhid || generateUHID(patients.map(patient => patient.uhid));
     const now = new Date().toISOString();
 
     const newPatient: Patient = {
       ...patientData,
+      uhid,
+      registration_number: registrationNumber,
       patient_id: patientId,
       created_at: now,
       updated_at: now,

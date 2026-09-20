@@ -17,6 +17,8 @@ export interface User {
 
 export interface Patient {
   patient_id: string; // e.g. PAT-2026-0042
+  uhid: string; // e.g. UHID-2026-0042
+  registration_number?: string; // e.g. REG-2026-0001
   name: string;
   dob: string;
   age: number;
@@ -55,6 +57,37 @@ export interface Patient {
     weight?: string;
     respiratory_rate?: string;
   };
+  abha_id?: string;
+  preferred_language?: string;
+  consent_given?: boolean;
+  consent_granted_at?: string;
+  consent_scope?: string[];
+  care_mode?: 'Allopathy' | 'AYUSH';
+  pre_consultation?: PreConsultationIntake;
+}
+
+export interface AyushProfile {
+  prakriti: string;
+  vikriti: string;
+  agni: string;
+  koshtha: string;
+  ahara_vihara: string;
+  nidana: string;
+  samprapti: string;
+  dashavidha_notes: string;
+}
+
+export interface PreConsultationIntake {
+  chief_complaint: string;
+  duration: string;
+  severity: 'Mild' | 'Moderate' | 'Severe';
+  symptoms: string;
+  prior_records_summary: string;
+  red_flags: string[];
+  preferred_language: string;
+  care_mode: 'Allopathy' | 'AYUSH';
+  ayush_profile?: AyushProfile;
+  submitted_at: string;
 }
 
 export type AppointmentStatus = 'Scheduled' | 'Waiting' | 'In Consultation' | 'Completed' | 'Cancelled' | 'No Show';

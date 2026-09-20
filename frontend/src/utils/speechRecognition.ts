@@ -23,6 +23,8 @@ export class ClinicalVoiceDictation {
   private onEndCallback?: () => void;
   private restartTimeout: any = null;
   private shouldAutoRestart: boolean = false;
+  private terminalError: string | null = null;
+  private errorReported = false;
 
   // Web Audio Visualizer state
   private audioContext: AudioContext | null = null;
@@ -69,19 +71,28 @@ export class ClinicalVoiceDictation {
           }
         };
 
+        this.recognition.onstart = () => {
+          this.isListening = true;
+        };
+
         this.recognition.onerror = (event: any) => {
           console.warn('Speech recognition warning/error:', event.error);
           if (event.error === 'no-speech' && this.shouldAutoRestart) {
             // Auto restart silently if continuous dictation is on
             return;
           }
+          this.terminalError = event.error || 'unknown';
+          this.shouldAutoRestart = false;
+          this.isListening = false;
+          if (this.errorReported) return;
+          this.errorReported = true;
           if (this.onErrorCallback) {
             this.onErrorCallback(event.error);
           }
         };
 
         this.recognition.onend = () => {
-          if (this.shouldAutoRestart && this.isListening) {
+          if (this.shouldAutoRestart && this.isListening && !this.terminalError) {
             this.restartTimeout = setTimeout(() => {
               try {
                 if (this.recognition && this.isListening) {
@@ -131,23 +142,39 @@ export class ClinicalVoiceDictation {
     this.onErrorCallback = onError;
     this.onEndCallback = onEnd;
     this.shouldAutoRestart = true;
+    this.terminalError = null;
+    this.errorReported = false;
 
     try {
+      let permissionStream: MediaStream | undefined;
+      if (navigator.mediaDevices?.getUserMedia) {
+        permissionStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
       this.recognition.lang = this.currentLanguage;
       this.recognition.start();
       this.isListening = true;
 
       // Start Audio Visualizer
-      await this.startAudioVisualizer();
-      return true;
+      await this.startAudioVisualizer(permissionStream);
+      await new Promise(resolve => setTimeout(resolve, 200));
+      const started = this.isListening && !this.terminalError;
+      if (!started) this.stopAudioVisualizer();
+      return started;
     } catch (err: any) {
       console.warn('Error starting speech recognition:', err);
+      this.shouldAutoRestart = false;
+      this.isListening = false;
+      if (this.onErrorCallback && !this.errorReported) {
+        this.errorReported = true;
+        this.onErrorCallback(err?.name === 'NotAllowedError' ? 'not-allowed' : 'start-failed');
+      }
       return false;
     }
   }
 
   public stop(): void {
     this.shouldAutoRestart = false;
+    this.terminalError = null;
     if (this.restartTimeout) clearTimeout(this.restartTimeout);
 
     if (this.recognition && this.isListening) {
@@ -166,11 +193,12 @@ export class ClinicalVoiceDictation {
   }
 
   // --- Real-time Audio Frequency Visualizer ---
-  private async startAudioVisualizer() {
+  private async startAudioVisualizer(existingStream?: MediaStream) {
     try {
-      if (!navigator.mediaDevices?.getUserMedia) return;
-
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = existingStream || (navigator.mediaDevices?.getUserMedia
+        ? await navigator.mediaDevices.getUserMedia({ audio: true })
+        : null);
+      if (!stream) return;
       this.mediaStream = stream;
 
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;

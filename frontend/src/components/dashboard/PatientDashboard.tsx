@@ -10,7 +10,8 @@ import {
   Download,
   AlertCircle,
   Languages,
-  UserRound
+  UserRound,
+  ClipboardCheck
 } from 'lucide-react';
 import { useHospital } from '../../context/HospitalContext';
 import { useAuth } from '../../context/AuthContext';
@@ -21,7 +22,11 @@ import { MultilingualDischargeModal } from '../clinical/MultilingualDischargeMod
 import { Modal } from '../common/Modal';
 import { CaseRecord } from '../../types';
 
-export const PatientDashboard: React.FC = () => {
+interface PatientDashboardProps {
+  onOpenPreConsultation?: () => void;
+}
+
+export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onOpenPreConsultation }) => {
   const { patients, getPatientCases, hospitalInfo } = useHospital();
   const { currentUser } = useAuth();
   const [selectedCaseForReport, setSelectedCaseForReport] = useState<CaseRecord | null>(null);
@@ -49,9 +54,19 @@ export const PatientDashboard: React.FC = () => {
               Welcome, {patient.name}!
             </h1>
             <p className="text-xs text-sky-100 mt-0.5">
-              Patient ID: <span className="font-mono font-bold text-white">{patient.patient_id}</span> • Blood Group: <span className="font-bold text-white">{patient.blood_group}</span> • Total Visits: {patientCases.length}
+              UHID: <span className="font-mono font-bold text-white">{patient.uhid}</span> • Patient ID: <span className="font-mono font-bold text-white">{patient.patient_id}</span> • Blood Group: <span className="font-bold text-white">{patient.blood_group}</span> • Total Visits: {patientCases.length}
             </p>
           </div>
+          {onOpenPreConsultation && (
+            <button
+              type="button"
+              onClick={onOpenPreConsultation}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-sky-800 text-xs font-extrabold shadow-sm hover:bg-sky-50 transition-colors shrink-0"
+            >
+              <ClipboardCheck className="w-4 h-4" />
+              Complete pre-consultation intake
+            </button>
+          )}
         </div>
       </div>
 

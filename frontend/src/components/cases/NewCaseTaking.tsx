@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   HelpCircle,
   Languages
+  , ClipboardCheck
 } from 'lucide-react';
 import {
   Patient,
@@ -36,8 +37,6 @@ import { useToast } from '../../context/ToastContext';
 import { DRUG_CATALOG } from '../../data/drugDatabase';
 import { checkDrugInteractions, checkAllergyConflict, DrugInteractionAlert } from '../../data/drugInteractions';
 import { evaluateVitals } from '../../utils/vitalsEvaluator';
-import { VoiceInputButton } from '../common/VoiceInputButton';
-import { ClinicalVoiceScribeModal } from '../clinical/ClinicalVoiceScribeModal';
 import { LabReportScannerModal } from '../clinical/LabReportScannerModal';
 import { MultilingualDischargeModal } from '../clinical/MultilingualDischargeModal';
 import { Badge } from '../common/Badge';
@@ -259,9 +258,6 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
     }
   }, [selectedPatientId]);
 
-  // AI Voice Scribe Studio Modal State
-  const [isScribeModalOpen, setIsScribeModalOpen] = useState(false);
-
   // AI Diagnostic Lab Report Scanner Modal State
   const [isLabScannerModalOpen, setIsLabScannerModalOpen] = useState(false);
 
@@ -350,15 +346,6 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
     }
 
     showToast('success', 'Voice Dictation Applied', 'Symptoms, duration, vitals, narrative, and prescriptions populated automatically.');
-  };
-
-  // Handle Speech Transcribe from quick mic
-  const handleVoiceTranscription = (rawText: string, parsed?: ParsedClinicalVoiceData) => {
-    if (!parsed) {
-      setMainComplaint(prev => (prev ? `${prev} ${rawText}` : rawText));
-      return;
-    }
-    handleApplyVoiceData(parsed);
   };
 
   // Prescription Drug Auto-Add
@@ -622,6 +609,29 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
             </div>
           </div>
 
+          {selectedPatient?.pre_consultation && (
+            <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <ClipboardCheck className="w-4 h-4 text-teal-700" />
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-teal-950">Patient pre-consultation summary</h3>
+                </div>
+                <Badge variant={selectedPatient.pre_consultation.red_flags.length ? 'critical' : 'success'} size="sm">
+                  {selectedPatient.pre_consultation.red_flags.length ? 'Priority review' : 'Consent recorded'}
+                </Badge>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div><span className="font-bold text-teal-800">Main concern</span><p className="mt-1 text-slate-800">{selectedPatient.pre_consultation.chief_complaint}</p></div>
+                <div><span className="font-bold text-teal-800">Duration / severity</span><p className="mt-1 text-slate-800">{selectedPatient.pre_consultation.duration || 'Not specified'} • {selectedPatient.pre_consultation.severity}</p></div>
+                <div><span className="font-bold text-teal-800">Care pathway</span><p className="mt-1 text-slate-800">{selectedPatient.pre_consultation.care_mode} • {selectedPatient.pre_consultation.preferred_language}</p></div>
+              </div>
+              <div><span className="font-bold text-teal-800 text-xs">Patient narrative</span><p className="mt-1 whitespace-pre-wrap text-xs text-slate-700">{selectedPatient.pre_consultation.symptoms}</p></div>
+              {selectedPatient.pre_consultation.red_flags.length > 0 && <div className="rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-900">Red flags: {selectedPatient.pre_consultation.red_flags.join(', ')}</div>}
+              {selectedPatient.pre_consultation.prior_records_summary && <div><span className="font-bold text-teal-800 text-xs">Prior records summary</span><p className="mt-1 whitespace-pre-wrap text-xs text-slate-700">{selectedPatient.pre_consultation.prior_records_summary}</p></div>}
+              {selectedPatient.pre_consultation.care_mode === 'AYUSH' && selectedPatient.pre_consultation.ayush_profile && <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950"><span className="font-bold">AYUSH notes:</span> {Object.values(selectedPatient.pre_consultation.ayush_profile).filter(Boolean).join(' • ')}</div>}
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-end gap-2">
             <button
@@ -718,14 +728,6 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
         </div>
       </div>
 
-      {/* Multi-Lingual Voice Dictation & Scribe Studio Banner */}
-      <VoiceInputButton
-        variant="banner"
-        onTranscript={handleVoiceTranscription}
-        autoParse={true}
-        onOpenFullScribe={() => setIsScribeModalOpen(true)}
-      />
-
       {/* STEP 1: Chief Complaint & AI Smart Assistant */}
       {activeStep === 1 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -751,13 +753,6 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                     onChange={e => setMainComplaint(e.target.value)}
                     className="w-full p-3.5 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all placeholder:text-slate-400 font-medium"
                   />
-                  <div className="absolute right-3 bottom-3">
-                    <VoiceInputButton
-                      variant="icon"
-                      onTranscript={handleVoiceTranscription}
-                      autoParse={true}
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -2010,12 +2005,6 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
         )}
       </div>
 
-      {/* AI Multi-Lingual Clinical Voice Scribe Studio Modal */}
-      <ClinicalVoiceScribeModal
-        isOpen={isScribeModalOpen}
-        onClose={() => setIsScribeModalOpen(false)}
-        onApplyToCase={handleApplyVoiceData}
-      />
 
       {/* AI Diagnostic Lab Report Scanner & OCR Modal */}
       <LabReportScannerModal

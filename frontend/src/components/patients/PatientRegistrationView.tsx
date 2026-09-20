@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { CheckCircle2, ClipboardList, UserPlus } from 'lucide-react';
 import { useHospital } from '../../context/HospitalContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Patient } from '../../types';
+import { generateRegistrationNumber, generateUHID } from '../../utils/formatters';
 
 interface PatientRegistrationViewProps {
   onStartCase: (patientId: string) => void;
@@ -12,12 +14,16 @@ const fieldClass = 'mt-1 w-full px-3 py-2.5 bg-slate-50 border border-slate-200 
 
 export const PatientRegistrationView: React.FC<PatientRegistrationViewProps> = ({ onStartCase }) => {
   const { addPatient } = useHospital();
+  const { registerPatient } = useAuth();
   const { showToast } = useToast();
   const [name, setName] = useState('');
+  const [registrationNumber, setRegistrationNumber] = useState(() => generateRegistrationNumber());
+  const [uhid, setUhid] = useState(() => generateUHID());
   const [dob, setDob] = useState('');
   const [age, setAge] = useState<number | ''>('');
   const [gender, setGender] = useState<Patient['gender']>('Male');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [bloodGroup, setBloodGroup] = useState<Patient['blood_group']>('Unknown');
@@ -45,12 +51,14 @@ export const PatientRegistrationView: React.FC<PatientRegistrationViewProps> = (
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!name.trim() || !phone.trim() || !age || !symptoms.trim()) {
-      showToast('error', 'Required details missing', 'Enter name, age, phone, and current symptoms.');
+    if (!name.trim() || !phone.trim() || !age || !symptoms.trim() || password.length < 6) {
+      showToast('error', 'Required details missing', 'Enter name, age, phone, symptoms, and a password of at least 6 characters.');
       return;
     }
 
     const patient = addPatient({
+      registration_number: registrationNumber.trim() || generateRegistrationNumber(),
+      uhid: uhid.trim() || generateUHID(),
       name: name.trim(),
       dob: dob || 'Not provided',
       age: Number(age),
@@ -87,7 +95,12 @@ export const PatientRegistrationView: React.FC<PatientRegistrationViewProps> = (
     });
 
     if (!patient) return;
-    showToast('success', 'Patient registered', 'Opening the digital case form.');
+    const patientEmail = `${name.toLowerCase().replace(/\s+/g, '')}@patient.org`;
+    if (!registerPatient(patientEmail, patient.name, patient.patient_id, password, false)) {
+      showToast('error', 'Registration failed', 'A patient account already exists for this email.');
+      return;
+    }
+    showToast('success', 'Patient registered', `Patient number ${patient.patient_id} assigned. Opening the digital case form.`);
     onStartCase(patient.patient_id);
   };
 
@@ -114,6 +127,9 @@ export const PatientRegistrationView: React.FC<PatientRegistrationViewProps> = (
             <label className="font-bold text-slate-700">Age *<input type="number" min={0} max={120} value={age} onChange={event => setAge(event.target.value ? Number(event.target.value) : '')} placeholder="Age" className={fieldClass} required /></label>
             <label className="font-bold text-slate-700">Gender<select value={gender} onChange={event => setGender(event.target.value as Patient['gender'])} className={fieldClass}><option>Male</option><option>Female</option><option>Other</option></select></label>
             <label className="font-bold text-slate-700">Phone *<input type="tel" value={phone} onChange={event => setPhone(event.target.value)} placeholder="Phone number" className={fieldClass} required /></label>
+            <label className="font-bold text-slate-700">Registration number<input value={registrationNumber} onChange={event => setRegistrationNumber(event.target.value)} placeholder="REG-2026-0001" className={fieldClass} /></label>
+            <label className="font-bold text-slate-700">UHID number<input value={uhid} onChange={event => setUhid(event.target.value)} placeholder="UHID-2026-0001" className={fieldClass} required /></label>
+            <label className="font-bold text-slate-700">Patient password *<input type="password" minLength={6} value={password} onChange={event => setPassword(event.target.value)} placeholder="6+ characters" className={fieldClass} required /></label>
             <label className="font-bold text-slate-700 sm:col-span-2">Address<input value={address} onChange={event => setAddress(event.target.value)} placeholder="Current address" className={fieldClass} /></label>
             <label className="font-bold text-slate-700">City<input value={city} onChange={event => setCity(event.target.value)} placeholder="City" className={fieldClass} /></label>
             <label className="font-bold text-slate-700">Blood group<select value={bloodGroup} onChange={event => setBloodGroup(event.target.value as Patient['blood_group'])} className={fieldClass}><option value="Unknown">Not known</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option><option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option></select></label>

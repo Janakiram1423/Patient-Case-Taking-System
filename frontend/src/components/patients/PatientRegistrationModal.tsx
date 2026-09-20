@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { User, Phone, Mail, MapPin, Heart, Shield, AlertCircle } from 'lucide-react';
 import { Patient } from '../../types';
 import { useHospital } from '../../context/HospitalContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { generateRegistrationNumber, generateUHID } from '../../utils/formatters';
 import { Modal } from '../common/Modal';
 
 interface PatientRegistrationModalProps {
@@ -17,14 +19,18 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
   onPatientCreated
 }) => {
   const { addPatient } = useHospital();
+  const { registerPatient } = useAuth();
   const { showToast } = useToast();
 
   const [name, setName] = useState('');
+  const [registrationNumber, setRegistrationNumber] = useState(() => generateRegistrationNumber());
+  const [uhid, setUhid] = useState(() => generateUHID());
   const [dob, setDob] = useState('1995-05-15');
   const [age, setAge] = useState<number>(31);
   const [gender, setGender] = useState<Patient['gender']>('Male');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [bloodGroup, setBloodGroup] = useState<Patient['blood_group']>('O+');
@@ -68,14 +74,22 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
       showToast('error', 'Validation Error', 'Valid phone number is required.');
       return;
     }
+    if (password.length < 6) {
+      showToast('error', 'Validation Error', 'Patient password must be at least 6 characters.');
+      return;
+    }
+
+    const patientEmail = email.trim() || `${name.toLowerCase().replace(/\s+/g, '')}@patient.org`;
 
     const created = addPatient({
+      registration_number: registrationNumber.trim() || generateRegistrationNumber(),
+      uhid: uhid.trim() || generateUHID(),
       name: name.trim(),
       dob,
       age: Number(age) || 30,
       gender,
       phone: phone.trim(),
-      email: email.trim() || `${name.toLowerCase().replace(/\s+/g, '')}@patient.org`,
+      email: patientEmail,
       address: address.trim() || 'Residential Enclave',
       city: city.trim() || 'City Center',
       blood_group: bloodGroup,
@@ -99,12 +113,17 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
     });
 
     if (created) {
+      if (!registerPatient(patientEmail, created.name, created.patient_id, password, false)) {
+        showToast('error', 'Registration Error', 'A patient account already exists for this email.');
+        return;
+      }
       if (onPatientCreated) onPatientCreated(created);
       onClose();
       // Reset
       setName('');
       setPhone('');
       setEmail('');
+      setPassword('');
     }
   };
 
@@ -174,6 +193,28 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
             </div>
 
             <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Registration No.</label>
+              <input
+                type="text"
+                value={registrationNumber}
+                onChange={e => setRegistrationNumber(e.target.value)}
+                className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-sky-500 font-semibold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">UHID Number <span className="text-rose-500">*</span></label>
+              <input
+                type="text"
+                required
+                value={uhid}
+                onChange={e => setUhid(e.target.value)}
+                placeholder="UHID-2026-0001"
+                className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-sky-500 font-semibold"
+              />
+            </div>
+
+            <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">Blood Group</label>
               <select
                 value={bloodGroup}
@@ -189,6 +230,21 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
               </select>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Patient Password <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                placeholder="Create a password (6+ characters)"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-sky-500 font-semibold"
+              />
             </div>
           </div>
         </div>

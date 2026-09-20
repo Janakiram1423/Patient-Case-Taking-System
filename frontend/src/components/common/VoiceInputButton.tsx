@@ -78,8 +78,10 @@ export const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
           setIsRecording(false);
           if (error === 'not-allowed') {
             showToast('error', 'Microphone Access Denied', 'Please allow microphone permissions in browser settings.');
+          } else if (error === 'network') {
+            showToast('error', 'Voice service unavailable', 'Live browser dictation was interrupted. Check your internet connection or use a clinical demo scenario.');
           } else {
-            showToast('info', 'Microphone Idle', 'No voice detected or speech stopped.');
+            showToast('warning', 'Voice dictation stopped', 'No usable speech was received. Check your microphone and try again.');
           }
         },
         () => {

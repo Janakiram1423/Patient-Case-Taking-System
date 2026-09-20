@@ -71,6 +71,7 @@ class InMemoryHospitalStore:
         self.patients: List[Dict[str, Any]] = [
             {
                 "patient_id": "PAT-2026-0001",
+                "uhid": "UHID-2026-0001",
                 "name": "Alex Mercer",
                 "dob": "1992-04-14",
                 "age": 34,
@@ -91,6 +92,7 @@ class InMemoryHospitalStore:
             },
             {
                 "patient_id": "PAT-2026-0002",
+                "uhid": "UHID-2026-0002",
                 "name": "Sunita Devi",
                 "dob": "1968-11-20",
                 "age": 58,
@@ -111,6 +113,7 @@ class InMemoryHospitalStore:
             },
             {
                 "patient_id": "PAT-2026-0003",
+                "uhid": "UHID-2026-0003",
                 "name": "Kavita Raman",
                 "dob": "1997-08-05",
                 "age": 29,

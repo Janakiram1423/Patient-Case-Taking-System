@@ -20,18 +20,14 @@ import { Badge } from './Badge';
 
 interface NavbarProps {
   onOpenNewPatientModal: () => void;
-  onOpenNewCaseModal: () => void;
   onSelectPatient: (patientId: string) => void;
   onSelectCase: (caseId: string) => void;
-  onOpenVoiceScribe?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenNewPatientModal,
-  onOpenNewCaseModal,
   onSelectPatient,
-  onSelectCase,
-  onOpenVoiceScribe
+  onSelectCase
 }) => {
   const { currentUser, allUsers, switchUser, currentRole } = useAuth();
   const { hospitalInfo, patients, cases, resetToDefaultData } = useHospital();
@@ -45,6 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         p =>
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.patient_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.uhid.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.phone.includes(searchQuery)
       )
     : [];
@@ -137,7 +134,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                               <div>
                                 <p className="font-semibold text-slate-800 group-hover:text-sky-700">{p.name}</p>
                                 <p className="text-[11px] text-slate-500">
-                                  {p.patient_id} • {p.age}y {p.gender} • {p.phone}
+                                  {p.uhid} • {p.patient_id} • {p.age}y {p.gender} • {p.phone}
                                 </p>
                               </div>
                             </div>
@@ -183,32 +180,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Actions & Role Switcher */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Global Voice Scribe Studio Trigger */}
-            {onOpenVoiceScribe && (
-              <button
-                type="button"
-                onClick={onOpenVoiceScribe}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 text-white text-xs font-black shadow-xs transition-all hover:shadow-md"
-                title="Open AI Multi-Lingual Voice Clinical Scribe"
-              >
-                <Mic className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-                <span className="hidden md:inline">🎙️ AI Voice Scribe</span>
-                <span className="md:hidden">Voice</span>
-              </button>
-            )}
-
             {/* Quick Action Buttons */}
-            {currentRole === 'doctor' && (
-              <button
-                onClick={onOpenNewCaseModal}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 text-white text-xs font-bold shadow-xs hover:shadow-md hover:from-sky-700 hover:to-teal-700 transition-all"
-              >
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Start New Case</span>
-              </button>
-            )}
-
-            {(currentRole === 'receptionist' || currentRole === 'admin') && (
+            {(currentRole === 'doctor' || currentRole === 'receptionist' || currentRole === 'admin') && (
               <button
                 onClick={onOpenNewPatientModal}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-xs hover:bg-emerald-700 transition-all"

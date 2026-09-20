@@ -86,6 +86,7 @@ export const INITIAL_USERS: User[] = [
 export const INITIAL_PATIENTS: Patient[] = [
   {
     patient_id: 'PAT-2026-0001',
+    uhid: 'UHID-2026-0001',
     name: 'Patient',
     dob: '1992-04-14',
     age: 34,
@@ -109,6 +110,7 @@ export const INITIAL_PATIENTS: Patient[] = [
   },
   {
     patient_id: 'PAT-2026-0002',
+    uhid: 'UHID-2026-0002',
     name: 'Patient',
     dob: '1968-11-20',
     age: 57,
@@ -132,6 +134,7 @@ export const INITIAL_PATIENTS: Patient[] = [
   },
   {
     patient_id: 'PAT-2026-0003',
+    uhid: 'UHID-2026-0003',
     name: 'Patient',
     dob: '1980-07-08',
     age: 46,
@@ -155,6 +158,7 @@ export const INITIAL_PATIENTS: Patient[] = [
   },
   {
     patient_id: 'PAT-2026-0004',
+    uhid: 'UHID-2026-0004',
     name: 'Patient',
     dob: '2019-02-15',
     age: 7,
@@ -178,6 +182,7 @@ export const INITIAL_PATIENTS: Patient[] = [
   },
   {
     patient_id: 'PAT-2026-0005',
+    uhid: 'UHID-2026-0005',
     name: 'Patient',
     dob: '1995-09-28',
     age: 30,
