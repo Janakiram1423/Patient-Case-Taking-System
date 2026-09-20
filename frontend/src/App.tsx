@@ -369,6 +369,7 @@ const MainAppContent: React.FC = () => {
             caseRecord={selectedCaseForReport}
             patient={patients.find(p => p.patient_id === selectedCaseForReport.patient_id) || patients[0]}
             hospitalInfo={hospitalInfo}
+            autoDownload={selectedCaseForReport.status !== 'Draft'}
             onClose={() => setSelectedCaseForReport(null)}
           />
         </Modal>

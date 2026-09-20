@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Printer,
   Download,
@@ -23,6 +23,7 @@ interface MedicalCaseSheetPDFProps {
   caseRecord: CaseRecord;
   patient: Patient;
   hospitalInfo: HospitalInfo;
+  autoDownload?: boolean;
   onClose?: () => void;
 }
 
@@ -30,9 +31,11 @@ export const MedicalCaseSheetPDF: React.FC<MedicalCaseSheetPDFProps> = ({
   caseRecord,
   patient,
   hospitalInfo,
+  autoDownload = false,
   onClose
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const autoDownloadStarted = useRef(false);
   const reportPatient = caseRecord.patient_details || patient;
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showMultilingualModal, setShowMultilingualModal] = useState(false);
@@ -64,6 +67,16 @@ export const MedicalCaseSheetPDF: React.FC<MedicalCaseSheetPDFProps> = ({
       showToast('error', 'Export Failed', 'Could not generate PDF.');
     }
   };
+
+  useEffect(() => {
+    if (!autoDownload || autoDownloadStarted.current) return;
+    autoDownloadStarted.current = true;
+    const downloadTimer = window.setTimeout(() => {
+      void handleDownloadPDF();
+    }, 300);
+
+    return () => window.clearTimeout(downloadTimer);
+  }, [autoDownload, caseRecord.case_id]);
 
   return (
     <div className="space-y-4">
