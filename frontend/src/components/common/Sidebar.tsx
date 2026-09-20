@@ -125,14 +125,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     {
       id: 'patient-registry',
       label: 'Patient Registry',
-      icon: <Users className="w-4 h-4 text-rose-500" />,
-      badge: `${patients.length}`
+      icon: <Users className="w-4 h-4 text-rose-500" />
     },
     {
       id: 'cases',
       label: 'AI Case Review & Summary',
-      icon: <FolderHeart className="w-4 h-4" />,
-      badge: `${cases.length}`
+      icon: <FolderHeart className="w-4 h-4" />
     },
     {
       id: 'audit-logs',
