@@ -82,9 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     {
       id: 'todays-queue',
       label: "Today's Queue",
-      icon: <CalendarCheck2 className="w-4 h-4 text-amber-500" />,
-      badge: `${patients.filter(patient => patient.created_at.startsWith(today)).length}`,
-      badgeColor: 'bg-amber-100 text-amber-800'
+      icon: <CalendarCheck2 className="w-4 h-4 text-amber-500" />
     }
   ];
 
