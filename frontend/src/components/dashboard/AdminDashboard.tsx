@@ -9,7 +9,8 @@ import {
   Building2,
   TrendingUp,
   Award,
-  CheckCircle2
+  CheckCircle2,
+  Trash2
 } from 'lucide-react';
 import { useHospital } from '../../context/HospitalContext';
 import { formatDate, formatDateTime } from '../../utils/formatters';
@@ -20,7 +21,7 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab }) => {
-  const { hospitalInfo, patients, cases, appointments, users, auditLogs } = useHospital();
+  const { hospitalInfo, patients, cases, appointments, users, auditLogs, deletePatient } = useHospital();
 
   const doctors = users.filter(u => u.role === 'doctor');
   const staff = users.filter(u => u.role !== 'patient');
@@ -76,6 +77,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex items-center justify-between">
           <div>
+
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Registered Patients</h2>
+                <p className="text-xs text-slate-500 mt-1">Remove a patient record from the hospital registry.</p>
+              </div>
+              <Badge variant="primary" size="sm">{patients.length} Patients</Badge>
+            </div>
+
+            {patients.length === 0 ? (
+              <p className="text-xs text-slate-500 text-center py-5">No registered patients.</p>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {patients.map(patient => (
+                  <div key={patient.patient_id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-bold text-slate-900 text-xs truncate">{patient.name}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{patient.uhid} • {patient.patient_id} • {patient.phone}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Remove patient ${patient.name} (${patient.patient_id})? This cannot be undone.`)) {
+                          deletePatient(patient.patient_id);
+                        }
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-colors shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Remove Patient
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
             <p className="text-[11px] font-bold text-slate-500 uppercase">Total Patients Registered</p>
             <h3 className="text-2xl font-black text-slate-900 mt-1">{patients.length}</h3>
             <p className="text-[11px] text-emerald-600 font-semibold mt-1">✓ 100% Digitalized EMR</p>

@@ -165,3 +165,21 @@ async def update_patient(patient_id: str, payload: PatientBase):
             return patient_with_uhid(updated_data)
 
     raise HTTPException(status_code=404, detail="Patient not found")
+
+@router.delete("/{patient_id}", status_code=204)
+async def delete_patient(patient_id: str):
+    db = get_db()
+    if db is not None:
+        try:
+            result = await db.patients.delete_one({"patient_id": {"$regex": f"^{patient_id}$", "$options": "i"}})
+            if result.deleted_count:
+                return None
+        except Exception:
+            pass
+
+    for index, patient in enumerate(db_store.patients):
+        if patient.get("patient_id", "").lower() == patient_id.lower():
+            db_store.patients.pop(index)
+            return None
+
+    raise HTTPException(status_code=404, detail="Patient not found")

@@ -280,6 +280,9 @@ export const HospitalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const deletePatient = (patientId: string) => {
     const target = patients.find(p => p.patient_id === patientId);
     if (!target) return;
+    fetch(`${API_BASE_URL}/patients/${encodeURIComponent(patientId)}`, { method: 'DELETE' }).catch(() => {
+      // Local state remains the fallback when the backend is unavailable.
+    });
     setPatients(prev => prev.filter(p => p.patient_id !== patientId));
     addAuditLog('Deleted Patient Record', 'Patient', patientId, `Removed patient record for ${target.name}`);
     showToast('info', 'Patient Removed', `Patient record ${patientId} deleted.`);
