@@ -5,6 +5,8 @@ This repository is structured into two standalone folders:
 - **`frontend/`**: React 19 + TypeScript + Vite + Tailwind CSS (Ready for **Vercel** deployment)
 - **`backend/`**: Python FastAPI + MongoDB async driver + Clinical Inference Services (Ready for **Render** deployment)
 
+The full MediKiosk background, problem statement, expected solution, integrated software and AI stack, patient journey, current repository alignment, and scope notes are documented in [MediKiosk-Problem-Statement.md](MediKiosk-Problem-Statement.md).
+
 ---
 
 ## 📁 Project Architecture
