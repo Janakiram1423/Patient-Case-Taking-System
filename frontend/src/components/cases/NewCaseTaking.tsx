@@ -40,6 +40,7 @@ import { evaluateVitals } from '../../utils/vitalsEvaluator';
 import { LabReportScannerModal } from '../clinical/LabReportScannerModal';
 import { MultilingualDischargeModal } from '../clinical/MultilingualDischargeModal';
 import { Badge } from '../common/Badge';
+import { PatientVoiceInput } from '../common/PatientVoiceInput';
 import { AICaseAssistantView } from '../ai/AICaseAssistantModal';
 
 
@@ -69,6 +70,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
   );
 
   const selectedPatient = patients.find(p => p.patient_id === selectedPatientId);
+  const voiceLanguage = selectedPatient?.preferred_language || 'en-IN';
   const existingCases = selectedPatient ? getPatientCases(selectedPatient.patient_id) : [];
   const nextVisitNumber = existingCases.length + 1;
 
@@ -754,6 +756,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                     onChange={e => setMainComplaint(e.target.value)}
                     className="w-full p-3.5 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all placeholder:text-slate-400 font-medium"
                   />
+                  <PatientVoiceInput value={mainComplaint} onChange={setMainComplaint} language={voiceLanguage} />
                 </div>
               </div>
 
@@ -941,6 +944,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                 onChange={e => setHpiCharacter(e.target.value)}
                 className="w-full p-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-sky-500 outline-none"
               />
+              <PatientVoiceInput value={hpiCharacter} onChange={setHpiCharacter} language={voiceLanguage} />
             </div>
           </div>
 
@@ -954,6 +958,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                 onChange={e => setAggravatingFactors(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
                 className="w-full p-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-sky-500 outline-none"
               />
+              <PatientVoiceInput value={aggravatingFactors.join(', ')} onChange={value => setAggravatingFactors(value.split(',').map(item => item.trim()).filter(Boolean))} language={voiceLanguage} />
             </div>
 
             <div>
@@ -965,6 +970,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                 onChange={e => setRelievingFactors(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
                 className="w-full p-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-sky-500 outline-none"
               />
+              <PatientVoiceInput value={relievingFactors.join(', ')} onChange={value => setRelievingFactors(value.split(',').map(item => item.trim()).filter(Boolean))} language={voiceLanguage} />
             </div>
           </div>
 
@@ -979,6 +985,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
               onChange={e => setPreviousTreatment(e.target.value)}
               className="w-full p-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-sky-500 outline-none"
             />
+            <PatientVoiceInput value={previousTreatment} onChange={setPreviousTreatment} language={voiceLanguage} />
           </div>
 
           <div>
@@ -995,6 +1002,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
               onChange={e => setDetailedNarrative(e.target.value)}
               className="w-full p-3 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:border-sky-500 outline-none font-medium leading-relaxed"
             />
+            <PatientVoiceInput value={detailedNarrative} onChange={setDetailedNarrative} language={voiceLanguage} />
           </div>
         </div>
       )}
@@ -1156,6 +1164,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                   onChange={e => setCustomPastConditions(e.target.value)}
                   className="w-full p-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-sky-500"
                 />
+                <PatientVoiceInput value={customPastConditions} onChange={setCustomPastConditions} language={voiceLanguage} />
               </div>
 
               <div>
@@ -1167,6 +1176,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                   onChange={e => setPreviousSurgeries(e.target.value)}
                   className="w-full p-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-sky-500"
                 />
+                <PatientVoiceInput value={previousSurgeries} onChange={setPreviousSurgeries} language={voiceLanguage} />
               </div>
 
               <div>
@@ -1178,6 +1188,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                   onChange={e => setPreviousHospitalizations(e.target.value)}
                   className="w-full p-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-sky-500"
                 />
+                <PatientVoiceInput value={previousHospitalizations} onChange={setPreviousHospitalizations} language={voiceLanguage} />
               </div>
             </div>
           </div>
@@ -1238,6 +1249,7 @@ export const NewCaseTaking: React.FC<NewCaseTakingProps> = ({
                   onChange={e => setOccupation(e.target.value)}
                   className="w-full p-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-sky-500"
                 />
+                <PatientVoiceInput value={occupation} onChange={setOccupation} language={voiceLanguage} />
               </div>
             </div>
           </div>

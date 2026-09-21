@@ -5,6 +5,7 @@ import { useHospital } from '../../context/HospitalContext';
 import { useToast } from '../../context/ToastContext';
 import { SUPPORTED_LANGUAGES } from '../../data/multilingualClinicalDictionary';
 import { AyushProfile, Patient, PreConsultationIntake as IntakeRecord, PriorDocument } from '../../types';
+import { PatientVoiceInput } from '../common/PatientVoiceInput';
 
 const fieldClass = 'mt-1 w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-sky-500 text-sm';
 const redFlagPatterns = [
@@ -160,6 +161,7 @@ export const PreConsultationIntake: React.FC<PreConsultationIntakeProps> = ({ pa
               <label key={question} className="block text-xs font-bold text-slate-700">
                 {question}
                 <textarea rows={2} value={guidedAnswers[question] || ''} onChange={event => setGuidedAnswers(current => ({ ...current, [question]: event.target.value }))} placeholder="Your answer" className={fieldClass} />
+                <PatientVoiceInput value={guidedAnswers[question] || ''} onChange={value => setGuidedAnswers(current => ({ ...current, [question]: value }))} language={language} />
               </label>
             ))}
           </div>
@@ -168,10 +170,10 @@ export const PreConsultationIntake: React.FC<PreConsultationIntakeProps> = ({ pa
         <section className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 space-y-4">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3"><Languages className="w-4 h-4 text-sky-600" /><h2 className="text-sm font-extrabold text-slate-900">Your current concern</h2></div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <label className="font-bold text-slate-700 sm:col-span-2">Main concern *<input required value={chiefComplaint} onChange={event => setChiefComplaint(event.target.value)} placeholder="What brings you to the hospital?" className={fieldClass} /></label>
-            <label className="font-bold text-slate-700">How long?<input value={duration} onChange={event => setDuration(event.target.value)} placeholder="Example: 3 days" className={fieldClass} /></label>
+            <label className="font-bold text-slate-700 sm:col-span-2">Main concern *<input required value={chiefComplaint} onChange={event => setChiefComplaint(event.target.value)} placeholder="What brings you to the hospital?" className={fieldClass} /><PatientVoiceInput value={chiefComplaint} onChange={setChiefComplaint} language={language} /></label>
+            <label className="font-bold text-slate-700">How long?<input value={duration} onChange={event => setDuration(event.target.value)} placeholder="Example: 3 days" className={fieldClass} /><PatientVoiceInput value={duration} onChange={setDuration} language={language} /></label>
             <label className="font-bold text-slate-700">Severity<select value={severity} onChange={event => setSeverity(event.target.value as IntakeRecord['severity'])} className={fieldClass}><option>Mild</option><option>Moderate</option><option>Severe</option></select></label>
-            <label className="font-bold text-slate-700 sm:col-span-2">Describe your symptoms *<textarea required rows={4} value={symptoms} onChange={event => setSymptoms(event.target.value)} placeholder="Tell us what you are experiencing, in your own words." className={fieldClass} /></label>
+            <label className="font-bold text-slate-700 sm:col-span-2">Describe your symptoms *<textarea required rows={4} value={symptoms} onChange={event => setSymptoms(event.target.value)} placeholder="Tell us what you are experiencing, in your own words." className={fieldClass} /><PatientVoiceInput value={symptoms} onChange={setSymptoms} language={language} /></label>
           </div>
           {detectedRedFlags.length > 0 && <div className="flex items-start gap-2 rounded-xl bg-rose-50 border border-rose-300 p-3 text-xs text-rose-900"><AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" /><span><strong>Priority symptoms detected:</strong> {detectedRedFlags.join(', ')}. Do not wait for routine registration; contact the triage desk now.</span></div>}
         </section>
@@ -180,8 +182,8 @@ export const PreConsultationIntake: React.FC<PreConsultationIntakeProps> = ({ pa
           <section className="bg-amber-50 rounded-2xl border border-amber-200 p-5 sm:p-6 space-y-4">
             <div><h2 className="text-sm font-extrabold text-amber-950">AYUSH / Dashavidha Pariksha</h2><p className="text-xs text-amber-800 mt-1">These details help the Ayurvedic practitioner prepare a personalized assessment.</p></div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              {([['prakriti', 'Prakriti / constitution'], ['vikriti', 'Vikriti / current imbalance'], ['agni', 'Agni / digestive capacity'], ['koshtha', 'Koshtha / bowel nature'], ['ahara_vihara', 'Ahara-Vihara / diet and lifestyle'], ['nidana', 'Nidana / possible causes'], ['samprapti', 'Samprapti / disease progression']] as Array<[keyof AyushProfile, string]>).map(([key, label]) => <label key={key} className="font-bold text-amber-950">{label}<input value={ayush[key]} onChange={event => updateAyush(key, event.target.value)} placeholder="Add details if known" className="mt-1 w-full px-3 py-2.5 bg-white border border-amber-200 rounded-xl outline-none focus:border-amber-500 text-sm" /></label>)}
-              <label className="font-bold text-amber-950 sm:col-span-2">Other Dashavidha observations<textarea rows={3} value={ayush.dashavidha_notes} onChange={event => updateAyush('dashavidha_notes', event.target.value)} placeholder="Sara, Samhanana, Pramana, Satmya, Sattva, Vaya, exercise capacity" className="mt-1 w-full px-3 py-2.5 bg-white border border-amber-200 rounded-xl outline-none focus:border-amber-500 text-sm" /></label>
+              {([['prakriti', 'Prakriti / constitution'], ['vikriti', 'Vikriti / current imbalance'], ['agni', 'Agni / digestive capacity'], ['koshtha', 'Koshtha / bowel nature'], ['ahara_vihara', 'Ahara-Vihara / diet and lifestyle'], ['nidana', 'Nidana / possible causes'], ['samprapti', 'Samprapti / disease progression']] as Array<[keyof AyushProfile, string]>).map(([key, label]) => <label key={key} className="font-bold text-amber-950">{label}<input value={ayush[key]} onChange={event => updateAyush(key, event.target.value)} placeholder="Add details if known" className="mt-1 w-full px-3 py-2.5 bg-white border border-amber-200 rounded-xl outline-none focus:border-amber-500 text-sm" /><PatientVoiceInput value={ayush[key]} onChange={value => updateAyush(key, value)} language={language} /></label>)}
+              <label className="font-bold text-amber-950 sm:col-span-2">Other Dashavidha observations<textarea rows={3} value={ayush.dashavidha_notes} onChange={event => updateAyush('dashavidha_notes', event.target.value)} placeholder="Sara, Samhanana, Pramana, Satmya, Sattva, Vaya, exercise capacity" className="mt-1 w-full px-3 py-2.5 bg-white border border-amber-200 rounded-xl outline-none focus:border-amber-500 text-sm" /><PatientVoiceInput value={ayush.dashavidha_notes} onChange={value => updateAyush('dashavidha_notes', value)} language={language} /></label>
             </div>
           </section>
         )}
@@ -190,6 +192,7 @@ export const PreConsultationIntake: React.FC<PreConsultationIntakeProps> = ({ pa
           <h2 className="text-sm font-extrabold text-slate-900">Prior records summary</h2>
           <p className="text-xs text-slate-500">Mention previous diagnoses, medicines, allergies, surgeries, or important lab results. Staff can attach and scan documents during consultation.</p>
           <textarea rows={4} value={priorRecords} onChange={event => setPriorRecords(event.target.value)} placeholder="Example: Diabetes for 5 years; taking metformin; allergic to penicillin; last HbA1c was..." className={fieldClass} />
+          <PatientVoiceInput value={priorRecords} onChange={setPriorRecords} language={language} />
           <label className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-sky-200 bg-sky-50 text-sky-800 text-xs font-bold cursor-pointer">
             <FileUp className="w-4 h-4" />
             Attach prescriptions, lab reports, or discharge summaries
